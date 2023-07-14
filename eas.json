@@ -10,12 +10,14 @@
     "preview": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {
+      "autoIncrement": true
+    }
   },
   "submit": {
     "production": {
       "android": {
-        "serviceAccountKeyPath": "../pc-api-6162860301018426194-910-97f2db279f64",
+        "serviceAccountKeyPath": "./pc-api-6162860301018426194-910-97f2db279f64",
         "track": "internal"
       },
       "ios": {
