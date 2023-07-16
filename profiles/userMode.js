@@ -17,7 +17,11 @@ import { useContext, useState, useEffect } from "react";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import firestore from "@react-native-firebase/firestore";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentGroupCadre, setCurrentGroupName } from "../redux/userSlice";
+import {
+  setCurrentGroupCadre,
+  setCurrentGroupName,
+  setRunAppUseEffect,
+} from "../redux/userSlice";
 
 const UserMode = () => {
   const dispatch = useDispatch();
@@ -29,11 +33,6 @@ const UserMode = () => {
 
   const [groupNameError, setGroupNameError] = useState(false);
   let [groupMembership, setGroupMembership] = useState([]);
-  //const userCurrentGroup = useContext(UserCurrentGroupContext)
-
-  // const quizGroupNameRaw = userCurrentGroup.name
-  // const quizGroupName= quizGroupNameRaw.substring(0,quizGroupNameRaw.indexOf('-'))
-  // const groupName = quizGroupNameRaw.substring(quizGroupNameRaw.indexOf('-')+1)
 
   useEffect(() => {
     setGroupMembership(dbUser?.groupMembership);
@@ -165,6 +164,7 @@ const UserMode = () => {
           .then(() => {
             dispatch(setCurrentGroupName(userId + "-" + groupName));
             dispatch(setCurrentGroupCadre("Admin"));
+            dispatch(setRunAppUseEffect());
           })
           .catch((err) => {
             Alert.alert("An error occured, Try again");
@@ -224,6 +224,7 @@ const UserMode = () => {
                             onPress={() => {
                               dispatch(setCurrentGroupCadre(element.cadre));
                               dispatch(setCurrentGroupName(element.name));
+                              dispatch(setRunAppUseEffect());
                             }}
                             style={{
                               height: 40,

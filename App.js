@@ -1,5 +1,6 @@
+import "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -34,12 +35,18 @@ import {
   DrawerContentScrollView,
   DrawerItem,
 } from "@react-navigation/drawer";
+
 import StackProfilePage from "./profiles/stackProfilePage";
+import StackQuestionPage from "./question/stackQuestionPage";
+import StackQuizPage from "./quiz/stackQuizPage";
+import FlashCardStack from "./flashCards/flashCardStack";
+import dynamicLinks from "@react-native-firebase/dynamic-links";
 
 const Drawer = createDrawerNavigator();
 
 function App() {
   const dispatch = useDispatch();
+  const isMounted = useRef(false);
 
   let dbUserFirstName = useSelector((state) => state.user).dbUserFirstName;
   let dbUserLastName = useSelector((state) => state.user).dbUserLastName;
@@ -53,6 +60,64 @@ function App() {
   let paymentStatus = useSelector((state) => state.user).paymentStatus;
   let runAppUseEffect = useSelector((state) => state.user).runAppUseEffect;
   let emailVerified = useSelector((state) => state.user).emailVerified;
+
+  const quizGroupNameRaw = currentGroupName || "";
+  const groupName = quizGroupNameRaw.substring(
+    quizGroupNameRaw.indexOf("-") + 1
+  );
+
+  const deleteAccount = async () => {
+    firestore()
+      .collection("users")
+      .doc(userId)
+      .delete()
+      .catch((error) => console.log(error));
+    let user = auth().currentUser;
+    user
+      .delete()
+      .then(() => {
+        toggleRunUseEffect();
+        Alert.alert("Your account has been deleted.");
+
+        dispatch(setDbUser(null));
+        dispatch(setUserEmail(null));
+        dispatch(setCurrentGroupName(null));
+        dispatch(setCurrentGroupCadre(null));
+        dispatch(setEmailVerified(false));
+        dispatch(setDbUserFirstName(null));
+        dispatch(setDbUserLastName(null));
+        dispatch(setDbUserMiddleName(null));
+      })
+      .catch((error) => {
+        if (error.code === "auth/requires-recent-login") {
+          Alert.alert(
+            "This operation is sensitive and requires recent authentication. Log in again before retrying this request."
+          );
+        }
+      });
+  };
+
+  const wantToDelete = () => {
+    const validButtons = [
+      { text: "Don't Delete", style: "cancel", onPress: () => {} },
+      {
+        text: "Delete",
+        style: "destructive",
+        // If the user confirmed, then we dispatch the action we blocked earlier
+        // This will continue the action that had triggered the removal of the screen
+        onPress: () => deleteAccount(),
+      },
+    ];
+
+    Alert.alert(
+      "You are about to Delete your account",
+      "All your data will be lost. Are you sure you want to delete your account?",
+      validButtons.map((buttonText) => ({
+        text: buttonText.text,
+        onPress: buttonText.onPress,
+      }))
+    );
+  };
 
   const LogOut = async () => {
     await auth()
@@ -83,6 +148,307 @@ function App() {
       })
       .catch((error) => console.log(error.message));
   };
+
+  const JoinGroup = async (passKey) => {
+    //let passKey = base64.decode(passKey)
+    let key = passKey.substring(passKey.indexOf("~") + 1);
+    key = key.trim(); //remove spaces before and after the string
+
+    let groupToJoin = passKey
+      .substring(passKey.indexOf("?") + 1, passKey.indexOf("~"))
+      .replace(/\+/g, " ");
+    let groupToJoinId = groupToJoin.substring(0, groupToJoin.indexOf("-"));
+    let invitedCadre = passKey
+      .substring(0, passKey.indexOf("?"))
+      .replace(/\+/g, " ");
+
+    const docs = firestore().collection("users").doc(groupToJoinId);
+    dispatch(setLoading(true));
+    //setInitializing(true);
+
+    firestore()
+      .collection("users")
+      .doc(groupToJoinId)
+      .get()
+
+      .then((arg) => {
+        // setInitializing(true);
+        //  dispatch(setLoading(true));
+
+        let pass = arg?.data()[groupToJoin]?.examinerPass;
+
+        let passFiltered = pass?.filter((item) => item.passKey === key);
+
+        if (
+          passFiltered?.length > 0 &&
+          passKey // && groupMemberships.length<1
+        ) {
+          pass.splice(
+            pass.findIndex((item) => item.passKey === key),
+            1
+          );
+
+          firestore()
+            .collection("users")
+            .doc(groupToJoinId)
+            .update({
+              [`${groupToJoin}.examinerPass`]: pass, //firestore.FieldValue.arrayRemove(pass[0])
+            })
+            .then(async () => {
+              const docRef = firestore().collection("users").doc(userId);
+              // const docRef2 = firestore().collection('users').doc(groupToJoinId);
+
+              docRef.get().then((doc) => {
+                let data = doc.data();
+
+                // Find the index of the object that contains the attribute value to remove
+                const indexToRemove = data.groupMembership.findIndex(
+                  (element) =>
+                    element.name === groupToJoin && element.cadre !== "Admin"
+                );
+
+                if (indexToRemove !== -1 && data.userId === userId) {
+                  // Remove the object from the array using the splice method
+                  data.groupMembership.splice(indexToRemove, 1);
+
+                  // Update the document with the modified array
+                  docRef
+                    .update({
+                      groupMembership: [
+                        ...data.groupMembership,
+                        {
+                          cadre: invitedCadre,
+                          name: groupToJoin,
+                        },
+                      ],
+                    })
+                    .then(() => {
+                      // setInitializing(false);
+                      dispatch(setLoading(false));
+                    })
+                    .catch((error) => {
+                      // setInitializing(false);
+                      dispatch(setLoading(false));
+                      Alert.alert("An error has occurred");
+                      // console.error('Error updating document: ', error);
+                    });
+                } else {
+                  const indexToRemove2 = data.groupMembership.findIndex(
+                    (element) => element.name === groupToJoin
+                  );
+
+                  if (indexToRemove2 === -1) {
+                    docRef
+                      .update({
+                        groupMembership: [
+                          ...data.groupMembership,
+                          {
+                            cadre: invitedCadre,
+                            name: groupToJoin,
+                          },
+                        ],
+                      })
+                      .then(
+                        dispatch(setLoading(false)) //setInitializing(false)
+                      )
+                      .catch((err) => console.log(err.message));
+                  }
+                }
+              });
+            })
+
+            .then(async () => {
+              // const docRef = firestore().collection('users').doc(userId);
+              const docRef2 = firestore()
+                .collection("users")
+                .doc(groupToJoinId);
+
+              docRef2.get().then(
+                (doc) => {
+                  let data = doc.data()[groupToJoin];
+                  let data2 = doc.data().groupMembership;
+
+                  // Find the index of the object that contains the attribute value to remove
+                  const indexToRemove = data.members.findIndex(
+                    (element) => element.userId === user.uid
+                  );
+                  const indexToRemove2 = data2.findIndex(
+                    (element) => element.name === groupToJoin
+                  );
+
+                  if (indexToRemove !== -1) {
+                    // Remove the object from the array using the splice method
+                    let updatedMembers = data.members.splice(indexToRemove, 1);
+                    updatedMembers = [
+                      ...data.members,
+                      {
+                        dateJoin: Date.now(),
+                        cadre: invitedCadre,
+                        userId: userId,
+                        firstName: dbUserFirstName,
+                        middleName: dbUserLastName,
+                        middleName: dbUserMiddleName,
+                        email: userEmail,
+                      },
+                    ];
+
+                    let updatedData = {
+                      ...data,
+                      members: updatedMembers,
+                    };
+
+                    // Update the document with the modified array
+                    docRef2
+                      .update({
+                        [`${groupToJoin}`]: updatedData,
+                        // [`${groupToJoin}.members`]:
+
+                        // [...data.members,
+                        //        {
+                        //           dateJoin: Date.now(),
+                        //           cadre : invitedCadre,
+                        //           userId : userId,
+                        //           firstName: dbUserFirstName,
+                        //           middleName: dbUserLastName,
+                        //           middleName: dbUserMiddleName,
+                        //           email : userEmail
+                        //         }
+                        //       ]
+                      })
+                      .then(
+                        dispatch(setLoading(false)) //setInitializing(false)
+                      )
+
+                      .catch((error) => {
+                        Alert.alert("An error has occurred: " + error.message);
+                        //console.error('Error updating document: ', error);
+                        //setInitializing(false);
+                        dispatch(setLoading(false));
+                      });
+                  } else {
+                    let updatedMembers = [
+                      ...data.members,
+                      {
+                        dateJoin: Date.now(),
+                        cadre: invitedCadre,
+                        userId: userId,
+                        firstName: dbUserFirstName,
+                        middleName: dbUserLastName,
+                        middleName: dbUserMiddleName,
+                        email: userEmail,
+                      },
+                    ];
+
+                    let updatedData = {
+                      ...data,
+                      members: updatedMembers,
+                    };
+
+                    // if(indexToRemove2===-1)
+                    // {
+                    docRef2
+                      .update({
+                        [`${groupToJoin}`]: updatedData,
+                        // [`${groupToJoin}.members`]: [...data.members,
+                        //        {
+                        //           dateJoin: Date.now(),
+                        //           cadre : invitedCadre,
+                        //           userId : userId,
+                        //           firstName: dbUserFirstName,
+                        //           middleName: dbUserLastName,
+                        //           middleName: dbUserMiddleName,
+                        //           email : userEmail
+                        //         }
+                        //       ]
+                      })
+                      .then(
+                        dispatch(setLoading(false)) //setInitializing(false)
+                      )
+                      .catch((error) => {
+                        Alert.alert("An error has occurred: " + error.message);
+                        // console.error('Error updating document: ', error);
+                        // setInitializing(false);
+                        dispatch(setLoading(false));
+                      });
+                  }
+                }
+                //  }
+              );
+            })
+            .then(() => {
+              // setCurrentGroup({
+              //   name: groupToJoin,
+              //   cadre: invitedCadre,
+              // });
+              dispatch(setCurrentGroupCadre(invitedCadre));
+              dispatch(setCurrentGroupName(groupToJoin));
+              //setInitializing(false);
+              dispatch(setLoading(false));
+            });
+        } else {
+          // setPassKeyError(true)
+          Alert.alert("pass key not authorized");
+          //setInitializing(false);
+          dispatch(setLoading(false));
+        }
+      })
+      .then(
+        dispatch(setLoading(false)) //setInitializing(false)
+      )
+      .catch((error) => {
+        Alert.alert("An error has occurred: " + error.message); //err=>console.log(err) && setPassKeyError(true)
+        // setInitializing(false);
+        dispatch(setLoading(false));
+      });
+  };
+
+  useEffect(() => {
+    if (isMounted.current === true) {
+      dynamicLinks().onLink(
+        //handleDynamicLink
+        (link) => {
+          if (link?.url) {
+            if (dbUserFirstName) {
+              let passKey = decodeURI(link.url).split("=")[1];
+              // if (dbUser?.userId !== "") {
+              JoinGroup(passKey);
+              // } else {
+              //   Alert.alert("Signin and click the link again");
+              // }
+            } else {
+              Alert.alert("Signin and click the link again");
+            }
+          }
+        }
+      );
+
+      dynamicLinks()
+        .getInitialLink()
+        .then((link) => {
+          if (dbUserFirstName) {
+            if (
+              link?.url //=== 'https://invertase.io/offer'
+            ) {
+              let passKey = link.url.split("=")[1];
+              // if (dbUser?.userId !== "") {
+              JoinGroup(passKey);
+              // if (Platform.OS === "ios") {
+              //   Alert.alert("Click the link again to join group");
+              // }
+              // } else {
+              //   Alert.alert("Signin and click the link again");
+              // }
+              // ...set initial route as offers screen
+              // handleDynamicLink({link, usrId});
+            }
+          } else {
+            Alert.alert("Signin and click the link again");
+          }
+        });
+    } else {
+      isMounted.current = !isMounted.current;
+    }
+  }, [dbUserFirstName]);
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged((credentials) => {
@@ -154,15 +520,6 @@ function App() {
 
   if (userEmail) {
     return (
-      // <View style={styles.container}>
-      //   <Text>Open up App.js to start working on your app!</Text>
-      //   <Text>UserId: {userId}</Text>
-      //   <Text>UserEmail: {userEmail}</Text>
-      //   <Text>emailVerified: {emailVerified}</Text>
-      //   <Button title="Sign out" onPress={() => LogOut()} />
-      //   <StatusBar style="auto" />
-      // </View>
-
       <NavigationContainer>
         <SafeAreaView
           Style={{
@@ -186,17 +543,18 @@ function App() {
           >
             {dbUserFirstName && (
               <View style={{ width: "100%", textAlign: "center" }}>
-                <Button title="Sign out" onPress={() => LogOut()} />
-                <TouchableOpacity
+                <Button
+                  title="Change the Current Quiz Group"
                   onPress={() => {
                     dispatch(setCurrentGroupCadre(null));
                     dispatch(setCurrentGroupName(null));
                   }}
-                >
+                />
+                {/* <TouchableOpacity>
                   <Text style={{ fontSize: 20, textAlign: "center" }}>
                     Change the Current Quiz Group
                   </Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
             )}
           </View>
@@ -215,160 +573,159 @@ function App() {
               />;
             },
           }}
-          // drawerContent={(props) => {
-          //   const filteredProps = {
-          //     ...props,
-          //     state: {
-          //       ...props.state,
-          //       routeNames: props.state.routeNames.filter(
-          //         // To hide single option
-          //         //  (routeName) => routeName !== 'QuestionStack',
-          //         // To hide multiple options you can add & condition
-          //         (routeName) => {
-          //           //   routeName === 'ProfileStack'
-          //           // &&
-          //           //  routeName === 'QuizStack'
-          //           //  && routeName === 'QuestionStack'
-          //         }
-          //       ),
-          //       routes: props.state.routes.filter((route) => {
-          //         //  route.name === 'ProfileStack'
-          //         //&&
-          //         //  route.name === 'QuizStack'
-          //         //  && route.name === 'QuestionStack'
-          //       }),
-          //       // ),
-          //     },
-          //   };
+          drawerContent={(props) => {
+            const filteredProps = {
+              ...props,
+              state: {
+                ...props.state,
+                routeNames: props.state.routeNames.filter(
+                  // To hide single option
+                  //  (routeName) => routeName !== 'QuestionStack',
+                  // To hide multiple options you can add & condition
+                  (routeName) => {
+                    routeName !== "ProfileStack";
+                    // &&
+                    //  routeName === 'QuizStack'
+                    //  && routeName === 'QuestionStack'
+                  }
+                ),
+                routes: props.state.routes.filter((route) => {
+                  route.name !== "ProfileStack";
+                  //&&
+                  //  route.name === 'QuizStack'
+                  //  && route.name === 'QuestionStack'
+                }),
+                // ),
+              },
+            };
 
-          //   return (
-          //     <DrawerContentScrollView {...filteredProps}>
-          //       <DrawerItemList {...filteredProps} />
+            return (
+              <DrawerContentScrollView {...props}>
+                <DrawerItemList {...props} />
 
-          //       <DrawerItem
-          //         label="Home"
-          //         onPress={() =>
-          //           props.navigation.navigate("ProfileStack", {
-          //             screen: "Profile",
-          //           })
-          //         }
-          //       />
+                <DrawerItem
+                  label="Home"
+                  onPress={() =>
+                    props.navigation.navigate("ProfileStack", {
+                      screen: "Profile",
+                    })
+                  }
+                />
 
-          //       {currentGroupCadre === "Admin" && (
-          //         <DrawerItem
-          //           label="View All Group Members"
-          //           onPress={() => props.navigation.navigate("All Users")}
-          //         />
-          //       )}
+                {currentGroupCadre === "Admin" && (
+                  <DrawerItem
+                    label="View All Group Members"
+                    onPress={() => props.navigation.navigate("All Users")}
+                  />
+                )}
 
-          //       {(currentGroupCadre === "Admin" ||
-          //         currentGroupCadre === "Chief Examiner" ||
-          //         currentGroupCadre === "Examiner") && (
-          //         <DrawerItem
-          //           label="Question Bank"
-          //           onPress={() =>
-          //             props.navigation.navigate("QuestionStack", {
-          //               screen: "Question Bank",
-          //             })
-          //           }
-          //         />
-          //       )}
+                {(currentGroupCadre === "Admin" ||
+                  currentGroupCadre === "Chief Examiner" ||
+                  currentGroupCadre === "Examiner") && (
+                  <DrawerItem
+                    label="Question Bank"
+                    onPress={() =>
+                      props.navigation.navigate("QuestionStack", {
+                        screen: "Question Bank",
+                      })
+                    }
+                  />
+                )}
 
-          //       {(currentGroupCadre === "Admin" ||
-          //         currentGroupCadre === "Chief Examiner" ||
-          //         currentGroupCadre === "Examiner") && (
-          //         <DrawerItem
-          //           label="Create Question"
-          //           onPress={() =>
-          //             props.navigation.navigate("QuestionStack", {
-          //               screen: "Create Question",
-          //               params: { item: null },
-          //             })
-          //           }
-          //         />
-          //       )}
+                {(currentGroupCadre === "Admin" ||
+                  currentGroupCadre === "Chief Examiner" ||
+                  currentGroupCadre === "Examiner") && (
+                  <DrawerItem
+                    label="Create Question"
+                    onPress={() =>
+                      props.navigation.navigate("QuestionStack", {
+                        screen: "Create Question",
+                        params: { item: null },
+                      })
+                    }
+                  />
+                )}
 
-          //       {(currentGroupCadre === "Admin" ||
-          //         currentGroupCadre === "Chief Examiner") && (
-          //         <DrawerItem
-          //           label="Quiz Bank"
-          //           onPress={() =>
-          //             props.navigation.navigate("QuizStack", {
-          //               screen: "Quiz Bank",
-          //             })
-          //           }
-          //         />
-          //       )}
-          //       {(currentGroupCadre === "Admin" ||
-          //         currentGroupCadre === "Chief Examiner") && (
-          //         <DrawerItem
-          //           label="Create Quiz"
-          //           onPress={() =>
-          //             props.navigation.navigate("QuizStack", {
-          //               screen: "Choose Quiz Questions",
-          //             })
-          //           }
-          //         />
-          //       )}
+                {(currentGroupCadre === "Admin" ||
+                  currentGroupCadre === "Chief Examiner") && (
+                  <DrawerItem
+                    label="Quiz Bank"
+                    onPress={() =>
+                      props.navigation.navigate("QuizStack", {
+                        screen: "Quiz Bank",
+                      })
+                    }
+                  />
+                )}
+                {(currentGroupCadre === "Admin" ||
+                  currentGroupCadre === "Chief Examiner") && (
+                  <DrawerItem
+                    label="Create Quiz"
+                    onPress={() =>
+                      props.navigation.navigate("QuizStack", {
+                        screen: "Choose Quiz Questions",
+                      })
+                    }
+                  />
+                )}
 
-          //       {currentGroupCadre && (
-          //         <DrawerItem
-          //           label="Chat Room"
-          //           onPress={() =>
-          //             props.navigation.navigate("ProfileStack", {
-          //               screen: "Chat",
-          //             })
-          //           }
-          //         />
-          //       )}
+                {currentGroupCadre && (
+                  <DrawerItem
+                    label="Chat Room"
+                    onPress={() =>
+                      props.navigation.navigate("ProfileStack", {
+                        screen: "Chat",
+                      })
+                    }
+                  />
+                )}
 
-          //       <DrawerItem
-          //         label="Flashcards"
-          //         onPress={() =>
-          //           props.navigation.navigate("FlashCardStack", {
-          //             screen: "FlashcardGroups",
-          //           })
-          //         }
-          //       />
+                <DrawerItem
+                  label="Flashcards"
+                  onPress={() =>
+                    props.navigation.navigate("FlashCardStack", {
+                      screen: "FlashcardGroups",
+                    })
+                  }
+                />
 
-          //       {paymentStatus || (
-          //         <DrawerItem
-          //           label="Subscribe"
-          //           onPress={() =>
-          //             props.navigation.navigate("ProfileStack", {
-          //               screen: "Payment",
-          //             })
-          //           }
-          //         />
-          //       )}
+                {/* {paymentStatus || (
+                  <DrawerItem
+                    label="Subscribe"
+                    onPress={() =>
+                      props.navigation.navigate("ProfileStack", {
+                        screen: "Payment",
+                      })
+                    }
+                  />
+                )} */}
 
-          //       <DrawerItem
-          //         label="About the App"
-          //         onPress={() =>
-          //           props.navigation.navigate("ProfileStack", {
-          //             screen: "About",
-          //           })
-          //         }
-          //       />
+                <DrawerItem
+                  label="About the App"
+                  onPress={() =>
+                    props.navigation.navigate("ProfileStack", {
+                      screen: "About",
+                    })
+                  }
+                />
 
-          //       <DrawerItem
-          //         label="Contact Us"
-          //         onPress={() =>
-          //           props.navigation.navigate("ProfileStack", {
-          //             screen: "ContactUs",
-          //           })
-          //         }
-          //       />
+                <DrawerItem
+                  label="Contact Us"
+                  onPress={() =>
+                    props.navigation.navigate("ProfileStack", {
+                      screen: "ContactUs",
+                    })
+                  }
+                />
 
-          //       <DrawerItem label="Sign Out" onPress={LogOut} />
+                <DrawerItem label="Sign Out" onPress={LogOut} />
 
-          //       {dbUserFirstName && (
-          //         <DrawerItem label="Delete Account" onPress={wantToDelete} />
-          //       )}
-          //     </DrawerContentScrollView>
-          //   );
-          // }
-          // }
+                {dbUserFirstName && (
+                  <DrawerItem label="Delete Account" onPress={wantToDelete} />
+                )}
+              </DrawerContentScrollView>
+            );
+          }}
         >
           {/* <Drawer.Screen
                           name="StackAttemptQuiz"
@@ -384,14 +741,14 @@ function App() {
             name="ProfileStack"
             component={StackProfilePage}
             options={{
-              title: `Group: ${currentGroupName || "None"}`,
+              title: `Group: ${groupName || "None"}`,
               headerShown: true,
-              drawerLabel: "Profile",
+              drawerLabel: () => null, //"Profile",
               headerLeft: null,
             }}
           />
 
-          {/* <Drawer.Screen
+          <Drawer.Screen
             name="FlashCardStack"
             component={FlashCardStack}
             options={{
@@ -424,7 +781,7 @@ function App() {
                 headerShown: true,
               }}
             />
-          )} */}
+          )}
         </Drawer.Navigator>
 
         {/* )} */}

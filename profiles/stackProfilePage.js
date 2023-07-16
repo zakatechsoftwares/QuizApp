@@ -1,16 +1,15 @@
 import { StyleSheet } from "react-native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-//import Profile from "./profile";
+import Profile from "./profile";
 import CreateProfile from "./createProfile";
-//import EditProfile from "./editProfile";
-//import AllUsers from "./allUsers";
+import AllUsers from "./allUsers";
 import UserMode from "./userMode";
-//import Chat from "./chat";
-// import ReviewAttempts from "../quiz/reviewAttempts";
-// import AttemptQuiz from "../quiz/attemptQuiz";
-// import PaymentPage from "../paymentPage";
-// import About from "../About";
+import Chat from "./chat";
+import ReviewAttempts from "../quiz/reviewAttempts";
+import AttemptQuiz from "../quiz/attemptQuiz";
+import PaymentPage from "../paymentPage";
+import About from "../About";
 import ContactUsPage from "./contactUs";
 import { useSelector } from "react-redux";
 
@@ -24,13 +23,12 @@ const StackProfilePage = () => {
   let paymentStatus = useSelector((state) => state.user).paymentStatus;
 
   dbUserFirstName = dbUserFirstName ? true : false;
-
   return (
     <Stack.Navigator //initialRouteName='Profile'
     >
-      {/* {paymentStatus === false && dbUserFirstName ? ( //paymentStatus &&
+      {paymentStatus === false && dbUserFirstName ? ( //paymentStatus &&
         <Stack.Screen name="Payment" component={PaymentPage} />
-      ) : null} */}
+      ) : null}
 
       {dbUserFirstName &&
         userCurrentGroupCadre && ( //paymentStatus &&
@@ -41,38 +39,38 @@ const StackProfilePage = () => {
           />
         )}
 
-      {/* {dbUserFirstName &&
+      {dbUserFirstName &&
         userCurrentGroupCadre && ( //paymentStatus &&
           <Stack.Screen
             name="Chat"
             component={Chat}
             options={{ title: "Chat Room", headerShown: true }}
           />
-        )} */}
-
-      {/* {dbUserFirstName &&
+        )}
+      {dbUserFirstName &&
         userCurrentGroupCadre === "Candidate" &&
         paymentStatus && (
           <Stack.Screen name="Review Attempts" component={ReviewAttempts} />
-        )} */}
+        )}
 
       {dbUserFirstName || (
         <Stack.Screen name="Create Profile" component={CreateProfile} />
       )}
-      {dbUserFirstName && ( //userCurrentGroupCadre===null &&
+      {dbUserFirstName && userCurrentGroupCadre === null && (
+        //userCurrentGroupCadre===null &&
         //paymentStatus &&
         <Stack.Screen name="User Mode" component={UserMode} />
       )}
-
-      {/* {dbUserFirstName && ( //paymentStatus &&
+      {/* 
+      {dbUserFirstName && ( //paymentStatus &&
         <Stack.Screen name="Edit Profile" component={EditProfile} />
       )} */}
 
-      {/* {dbUserFirstName &&
+      {dbUserFirstName &&
         userCurrentGroupCadre === "Admin" && ( //paymentStatus &&
           <Stack.Screen name="All Users" component={AllUsers} />
-        )} */}
-      {/* {dbUserFirstName &&
+        )}
+      {dbUserFirstName &&
         userCurrentGroupCadre === "Candidate" &&
         paymentStatus && (
           <Stack.Screen
@@ -86,13 +84,13 @@ const StackProfilePage = () => {
               // }
             }}
           />
-        )} */}
+        )}
 
-      {/* <Stack.Screen
+      <Stack.Screen
         name="About"
         component={About}
         options={{ title: "About the App", headerShown: true }}
-      /> */}
+      />
 
       <Stack.Screen
         name="ContactUs"

@@ -141,14 +141,6 @@ const SigninPage = ({ navigation }) => {
               throw error?.message;
             }
           })();
-
-          (async () => {
-            await AsyncStorage.setItem(
-              "@userCredential",
-              JSON.stringify({ email: email, password: password })
-            );
-            //  Alert.alert("you are signed in with email and password");
-          })();
         })
         .catch((error) => {
           dispatch(setLoading(false));
