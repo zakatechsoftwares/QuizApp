@@ -55,16 +55,16 @@ const AttemptQuiz = ({ navigation, route }) => {
 
   // const focusedRoute= useRoute()
   // console.log(focusedRoute.name)
-  useFocusEffect(
-    useCallback(() => {
-      // Hide the drawer icon when the screen gains focus
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     // Hide the drawer icon when the screen gains focus
 
-      navigationHideDrawer.setOptions({
-        headerLeft: () => null, // Remove the default drawer icon
-        headerRight: () => null,
-      });
-    }, [])
-  );
+  //     navigationHideDrawer.setOptions({
+  //       headerLeft: () => null, // Remove the default drawer icon
+  //       headerRight: () => null,
+  //     });
+  //   }, [])
+  // );
 
   const navigationState = useNavigationState((state) => state);
   const currentScreen = navigationState?.routes[navigationState?.index]?.name;
@@ -203,22 +203,22 @@ const AttemptQuiz = ({ navigation, route }) => {
   //   navigation.navigate('ProfileStack', {screen: 'Profile'})
   // }, timer);
 
-  useEffect(() => {
-    let timeout = setTimeout(() => {
-      timer > 0 && setTimer(timer - 1);
-      let hr = Math.floor(timer / 3600);
-      let min = Math.floor((timer % 3600) / 60);
-      let sec = Math.floor((timer % 3600) % 60);
-      setClock(
-        `${hr < 0 ? 0 : hr}hr : ${min > 0 ? min : 0}min : ${sec > 0 ? sec : 0}s`
-      );
-      if (timer === 0) {
-        timeUp();
-      }
-    }, 1000);
+  // useEffect(() => {
+  //   let timeout = setTimeout(() => {
+  //     timer > 0 && setTimer(timer - 1);
+  //     let hr = Math.floor(timer / 3600);
+  //     let min = Math.floor((timer % 3600) / 60);
+  //     let sec = Math.floor((timer % 3600) % 60);
+  //     setClock(
+  //       `${hr < 0 ? 0 : hr}hr : ${min > 0 ? min : 0}min : ${sec > 0 ? sec : 0}s`
+  //     );
+  //     if (timer === 0) {
+  //       timeUp();
+  //     }
+  //   }, 1000);
 
-    return () => clearTimeout(timeout);
-  }, [timer]);
+  //   return () => clearTimeout(timeout);
+  // }, [timer]);
 
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -231,53 +231,53 @@ const AttemptQuiz = ({ navigation, route }) => {
     return array;
   };
 
-  useEffect(() => {
-    const CallBackAndroid = (e) => {
-      // Prevent default behavior of leaving the screen
-      e.preventDefault();
+  // useEffect(() => {
+  //   const CallBackAndroid = (e) => {
+  //     // Prevent default behavior of leaving the screen
+  //     e.preventDefault();
 
-      //    setQuixId()
-      //  setQuixName(AsyncStorage.getItem('quixName'))
+  //     //    setQuixId()
+  //     //  setQuixName(AsyncStorage.getItem('quixName'))
 
-      // Prompt the user before leaving the screen
-      Alert.alert(
-        "You are about to Submit Quiz",
-        "Are you sure you want to submit?",
-        [
-          {
-            text: "Don't submit",
-            style: "cancel",
-            onPress: () => {
-              navigation.navigate("StackAttemptQuiz", {
-                screen: "Attempt Quiz",
-                params: { quizId: quizId, quizName: quizName },
-              });
-            },
-          },
-          {
-            text: "Submit",
-            style: "destructive",
-            // If the user confirmed, then we dispatch the action we blocked earlier
-            // This will continue the action that had triggered the removal of the screen
-            onPress: () => {
-              (async () => {
-                const quixIds = await AsyncStorage.getItem("quixId");
-                // console.log(quixIds)
-                assess();
-                navigation.dispatch(e.data.action);
-              })();
-            },
-          },
-        ]
-      );
-    };
+  //     // Prompt the user before leaving the screen
+  //     Alert.alert(
+  //       "You are about to Submit Quiz",
+  //       "Are you sure you want to submit?",
+  //       [
+  //         {
+  //           text: "Don't submit",
+  //           style: "cancel",
+  //           onPress: () => {
+  //             navigation.navigate("StackAttemptQuiz", {
+  //               screen: "Attempt Quiz",
+  //               params: { quizId: quizId, quizName: quizName },
+  //             });
+  //           },
+  //         },
+  //         {
+  //           text: "Submit",
+  //           style: "destructive",
+  //           // If the user confirmed, then we dispatch the action we blocked earlier
+  //           // This will continue the action that had triggered the removal of the screen
+  //           onPress: () => {
+  //             (async () => {
+  //               const quixIds = await AsyncStorage.getItem("quixId");
+  //               // console.log(quixIds)
+  //               assess();
+  //               navigation.dispatch(e.data.action);
+  //             })();
+  //           },
+  //         },
+  //       ]
+  //     );
+  //   };
 
-    // if(Platform.OS === 'android'){
-    navigation.addListener("beforeRemove", CallBackAndroid);
-    //}
+  //   // if(Platform.OS === 'android'){
+  //   navigation.addListener("beforeRemove", CallBackAndroid);
+  //   //}
 
-    //  if(Platform.OS === 'ios'){BackHandler.addEventListener('hardwareBackPress', CallBack )}
-  }, [navigation]);
+  //   //  if(Platform.OS === 'ios'){BackHandler.addEventListener('hardwareBackPress', CallBack )}
+  // }, [navigation]);
 
   useFocusEffect(
     useCallback(() => {

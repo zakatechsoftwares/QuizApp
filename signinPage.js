@@ -33,12 +33,13 @@ import {
 } from "./redux/userSlice";
 import firestore from "@react-native-firebase/firestore";
 
+GoogleSignin.configure({
+  webClientId:
+    "672892446980-4lu6df2v8dq9p6mpvtm9hkhu4nk9t8tp.apps.googleusercontent.com",
+});
+
 const SigninPage = ({ navigation }) => {
   let dispatch = useDispatch();
-  GoogleSignin.configure({
-    webClientId:
-      "672892446980-4lu6df2v8dq9p6mpvtm9hkhu4nk9t8tp.apps.googleusercontent.com",
-  });
 
   const [email, setEmail] = useState("");
   const [email1, setEmail1] = useState("");
@@ -179,10 +180,11 @@ const SigninPage = ({ navigation }) => {
   // }
 
   useEffect(() => {
-    //   const subscriber = auth().onAuthStateChanged((user) =>
-    //     onAuthStateChange(user)
-    //   );
-    //   return subscriber; // unsubscribe on unmount
+    GoogleSignin.configure({
+      webClientId:
+        "672892446980-4lu6df2v8dq9p6mpvtm9hkhu4nk9t8tp.apps.googleusercontent.com",
+      offlineAccess: true,
+    });
     setInitializing(false);
   }, []);
 

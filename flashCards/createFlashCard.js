@@ -5,10 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  AsyncStorage,
   StyleSheet,
   Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CardGroupPage = ({ navigation, route }) => {
   const [groupName, setGroupName] = useState("");

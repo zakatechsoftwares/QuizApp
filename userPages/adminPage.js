@@ -6,12 +6,13 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
+  Share,
 } from "react-native";
 import firestore from "@react-native-firebase/firestore";
 import CountDown from "../components/countDown";
 import { Text } from "react-native-paper";
 import dynamicLinks from "@react-native-firebase/dynamic-links";
-import Share from "react-native-share";
+//import Share from "react-native-share";
 import { SelectList } from "react-native-dropdown-select-list";
 import Animated, {
   useSharedValue,
@@ -70,32 +71,63 @@ const AdminPage = ({ navigation }) => {
         })
 
         .then((arg) => {
-          Share.open({
-            title: `Click the following link to join ${groupName} as ${invitedCadre}`,
+          Share.share({
             message: `Click the following link to join ${groupName} as ${invitedCadre} 
-Do NOT share the key as it can be used only once`,
-            url: arg,
-            email: "zakatechsoftware@gmail.com",
+Do NOT share the key as it can be used only once:${arg}`,
+            // url: `${arg}`,
           })
-            .then((res) => {
-              firestore()
-                .collection("users")
-                .doc(quizGroupName)
-                .update({
-                  [`${quizGroupNameRaw}.examinerPass`]:
-                    firestore.FieldValue.arrayUnion({
-                      cadre: invitedCadre,
-                      passKey: passKey,
-                    }),
-                })
-                .then(() => {
-                  Alert.alert("Invitation link sent");
-                })
-                .catch((e) => Alert.alert("An error has occured"));
+            .then((result) => {
+              if (result.action === Share.sharedAction) {
+                // Link shared successfully
+                // Run your additional function here
+                firestore()
+                  .collection("users")
+                  .doc(quizGroupName)
+                  .update({
+                    [`${quizGroupNameRaw}.examinerPass`]:
+                      firestore.FieldValue.arrayUnion({
+                        cadre: invitedCadre,
+                        passKey: passKey,
+                      }),
+                  })
+                  .then(() => {
+                    Alert.alert("Invitation link sent");
+                  })
+                  .catch((e) => Alert.alert("An error has occured"));
+              } else if (result.action === Share.dismissedAction) {
+                // Sharing dismissed
+              }
             })
-            .catch((err) => {
-              err && console.log(err);
+            .catch((error) => {
+              // Handle error
             });
+
+          //           Share.open({
+          //             title: `Click the following link to join ${groupName} as ${invitedCadre}`,
+          //             message: `Click the following link to join ${groupName} as ${invitedCadre}
+          // Do NOT share the key as it can be used only once`,
+          //             url: arg,
+          //             email: "zakatechsoftware@gmail.com",
+          //           })
+          //             .then((res) => {
+          //               firestore()
+          //                 .collection("users")
+          //                 .doc(quizGroupName)
+          //                 .update({
+          //                   [`${quizGroupNameRaw}.examinerPass`]:
+          //                     firestore.FieldValue.arrayUnion({
+          //                       cadre: invitedCadre,
+          //                       passKey: passKey,
+          //                     }),
+          //                 })
+          //                 .then(() => {
+          //                   Alert.alert("Invitation link sent");
+          //                 })
+          //                 .catch((e) => Alert.alert("An error has occured"));
+          //             })
+          //             .catch((err) => {
+          //               err && console.log(err);
+          //             });
         });
     } else setRoleError(true);
   };

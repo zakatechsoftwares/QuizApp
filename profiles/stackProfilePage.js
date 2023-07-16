@@ -16,11 +16,14 @@ import { useSelector } from "react-redux";
 const Stack = createNativeStackNavigator();
 
 const StackProfilePage = () => {
+  console.log("paymentstatus" + paymentStatus);
+
   let dbUserFirstName = useSelector((state) => state.user).dbUserFirstName;
   let userCurrentGroupCadre = useSelector(
     (state) => state.user
   ).currentGroupCadre;
   let paymentStatus = useSelector((state) => state.user).paymentStatus;
+  console.log("paymentstatus" + paymentStatus);
 
   dbUserFirstName = dbUserFirstName ? true : false;
   return (

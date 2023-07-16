@@ -7,6 +7,8 @@ import {
   View,
   SafeAreaView,
   TouchableOpacity,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import SigninPage from "./signinPage";
 import { useDispatch, Provider, useSelector } from "react-redux";
@@ -60,6 +62,7 @@ function App() {
   let paymentStatus = useSelector((state) => state.user).paymentStatus;
   let runAppUseEffect = useSelector((state) => state.user).runAppUseEffect;
   let emailVerified = useSelector((state) => state.user).emailVerified;
+  let loading = useSelector((state) => state.user).loading;
 
   const quizGroupNameRaw = currentGroupName || "";
   const groupName = quizGroupNameRaw.substring(
@@ -153,7 +156,7 @@ function App() {
     //let passKey = base64.decode(passKey)
     let key = passKey.substring(passKey.indexOf("~") + 1);
     key = key.trim(); //remove spaces before and after the string
-
+    console.log("passkey" + passKey);
     let groupToJoin = passKey
       .substring(passKey.indexOf("?") + 1, passKey.indexOf("~"))
       .replace(/\+/g, " ");
@@ -512,11 +515,21 @@ function App() {
             }
           })();
         }
+      } else {
+        dispatch(setLoading(false));
       }
     });
 
     return subscriber;
   }, [currentGroupName, runAppUseEffect]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   if (userEmail) {
     return (
@@ -564,16 +577,14 @@ function App() {
           screenOptions={{
             swipeEdgeWidth: 0,
             swipeEnabled: false,
-            headerRight: () => {
-              <Button
-                title="Sign Out"
-                onPress={
-                  () => LogOut() //signOut(auth)
-                }
-              />;
-            },
           }}
           drawerContent={(props) => {
+            // const { state, ...rest } = props;
+            // const newState = { ...state };
+            // newState.routes = newState.routes.filter(
+            //   (item) => item.name !== "FlashCardStack"
+            // );
+
             const filteredProps = {
               ...props,
               state: {
@@ -583,14 +594,14 @@ function App() {
                   //  (routeName) => routeName !== 'QuestionStack',
                   // To hide multiple options you can add & condition
                   (routeName) => {
-                    routeName !== "ProfileStack";
+                    routeName === "ProfileStack";
                     // &&
                     //  routeName === 'QuizStack'
                     //  && routeName === 'QuestionStack'
                   }
                 ),
                 routes: props.state.routes.filter((route) => {
-                  route.name !== "ProfileStack";
+                  route.name === "ProfileStack";
                   //&&
                   //  route.name === 'QuizStack'
                   //  && route.name === 'QuestionStack'
@@ -601,16 +612,18 @@ function App() {
 
             return (
               <DrawerContentScrollView {...props}>
-                <DrawerItemList {...props} />
+                <DrawerItemList
+                  {...props} //state={newState} {...rest}
+                />
 
-                <DrawerItem
+                {/* <DrawerItem
                   label="Home"
                   onPress={() =>
                     props.navigation.navigate("ProfileStack", {
                       screen: "Profile",
                     })
                   }
-                />
+                /> */}
 
                 {currentGroupCadre === "Admin" && (
                   <DrawerItem
@@ -743,7 +756,7 @@ function App() {
             options={{
               title: `Group: ${groupName || "None"}`,
               headerShown: true,
-              drawerLabel: () => null, //"Profile",
+              drawerLabel: "Home",
               headerLeft: null,
             }}
           />

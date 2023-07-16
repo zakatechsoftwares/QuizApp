@@ -1,24 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   ScrollView,
-  AsyncStorage,
   StyleSheet,
   Alert,
-} from 'react-native';
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const CardGroupPage = ({navigation, route}) => {
+const CardGroupPage = ({ navigation, route }) => {
+  const { groupNameEdit } = route.params;
 
- const {groupNameEdit} = route.params
-
-  const [groupName, setGroupName] = useState('');
-  const [frontText, setFrontText] = useState('');
-  const [backText, setBackText] = useState('');
+  const [groupName, setGroupName] = useState("");
+  const [frontText, setFrontText] = useState("");
+  const [backText, setBackText] = useState("");
   const [cards, setCards] = useState([]);
-  const [savedCards, setSavedCards] = useState([])
+  const [savedCards, setSavedCards] = useState([]);
 
   useEffect(() => {
     // if(route.params===undefined)
@@ -26,40 +25,39 @@ const CardGroupPage = ({navigation, route}) => {
     // {loadCards();}
     // if(route.params){
     //   const {groupNameEdit}=route.params
-      (
-        async () => {
-    try {
-      let savedCard = await AsyncStorage.getItem('cardGroupLists');
-        let remainingSavedCard = JSON.parse(savedCard).filter(item=> Object.keys(item)[0] !== groupNameEdit )
-      savedCard = JSON.parse(savedCard).filter(item=> Object.keys(item)[0] === groupNameEdit )
-      
-      if (savedCard !== null) {
-        setCards(Object.values(savedCard[0])[0]);
-        setGroupName(Object.keys(savedCard[0])[0])
-        setSavedCards(remainingSavedCard)
+    (async () => {
+      try {
+        let savedCard = await AsyncStorage.getItem("cardGroupLists");
+        let remainingSavedCard = JSON.parse(savedCard).filter(
+          (item) => Object.keys(item)[0] !== groupNameEdit
+        );
+        savedCard = JSON.parse(savedCard).filter(
+          (item) => Object.keys(item)[0] === groupNameEdit
+        );
+
+        if (savedCard !== null) {
+          setCards(Object.values(savedCard[0])[0]);
+          setGroupName(Object.keys(savedCard[0])[0]);
+          setSavedCards(remainingSavedCard);
+        }
+      } catch (error) {
+        Alert.alert("Error loading cards:", error);
       }
-    } 
-    catch (error) {
-      Alert.alert('Error loading cards:', error);
-    }
-  }
-      )()
-   // }
+    })();
+    // }
   }, []);
 
- 
-
   const addCard = () => {
-    if (frontText && backText){
-    const newCard = {
-      front: frontText,
-      back: backText,
-    };
+    if (frontText && backText) {
+      const newCard = {
+        front: frontText,
+        back: backText,
+      };
 
-    setCards([...cards, newCard]);
-    setFrontText('');
-    setBackText('');
-  }
+      setCards([...cards, newCard]);
+      setFrontText("");
+      setBackText("");
+    }
   };
 
   const removeCard = (index) => {
@@ -69,23 +67,21 @@ const CardGroupPage = ({navigation, route}) => {
   };
 
   const saveGroup = async () => {
-
-    
     try {
-      await AsyncStorage.setItem('cardGroupLists', JSON.stringify(savedCards.concat({[`${groupName}`]: cards})));
-      Alert.alert('Group of cards saved successfully!');
-      setFrontText('');
-    setBackText('');
-    setGroupName('')
-    setCards([])
-    navigation.navigate('FlashcardGroups')
-    
+      await AsyncStorage.setItem(
+        "cardGroupLists",
+        JSON.stringify(savedCards.concat({ [`${groupName}`]: cards }))
+      );
+      Alert.alert("Group of cards saved successfully!");
+      setFrontText("");
+      setBackText("");
+      setGroupName("");
+      setCards([]);
+      navigation.navigate("FlashcardGroups");
     } catch (error) {
-      Alert.alert('Error saving cards:');
+      Alert.alert("Error saving cards:");
     }
   };
-
-  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -96,7 +92,6 @@ const CardGroupPage = ({navigation, route}) => {
           placeholder="Group Name"
           value={groupName}
           onChangeText={setGroupName}
-         
         />
         <TextInput
           style={styles.input}
@@ -123,15 +118,19 @@ const CardGroupPage = ({navigation, route}) => {
       </View>
       <View style={styles.savedGroup}>
         <Text style={styles.title}>Saved Cards</Text>
-        {cards.length ? cards.map((card, index) => (
-          <View style={styles.card} key={index}>
-            <Text style={styles.cardText}>{card.front}</Text>
-            <Text style={styles.cardText}>{card.back}</Text>
-            <TouchableOpacity onPress={() => removeCard(index)}>
-              <Text style={styles.removeButton}>Remove</Text>
-            </TouchableOpacity>
-          </View>
-        )): <Text style={styles.cardText}>No Card in this group</Text> }
+        {cards.length ? (
+          cards.map((card, index) => (
+            <View style={styles.card} key={index}>
+              <Text style={styles.cardText}>{card.front}</Text>
+              <Text style={styles.cardText}>{card.back}</Text>
+              <TouchableOpacity onPress={() => removeCard(index)}>
+                <Text style={styles.removeButton}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.cardText}>No Card in this group</Text>
+        )}
       </View>
     </ScrollView>
   );
@@ -145,41 +144,41 @@ const styles = StyleSheet.create({
   cardGroup: {
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     padding: 10,
     borderRadius: 5,
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
   },
   addButton: {
-    backgroundColor: 'blue',
+    backgroundColor: "blue",
     padding: 10,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
   saveButton: {
-    backgroundColor: 'green',
+    backgroundColor: "green",
     padding: 10,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
   },
   savedGroup: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     padding: 10,
     borderRadius: 5,
   },
@@ -187,7 +186,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
   },
   cardText: {
@@ -195,9 +194,9 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   removeButton: {
-    color: 'red',
+    color: "red",
     fontSize: 16,
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
   },
 });
 
