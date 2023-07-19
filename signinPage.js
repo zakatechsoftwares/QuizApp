@@ -33,11 +33,6 @@ import {
 } from "./redux/userSlice";
 import firestore from "@react-native-firebase/firestore";
 
-GoogleSignin.configure({
-  webClientId:
-    "672892446980-4lu6df2v8dq9p6mpvtm9hkhu4nk9t8tp.apps.googleusercontent.com",
-});
-
 const SigninPage = ({ navigation }) => {
   let dispatch = useDispatch();
 

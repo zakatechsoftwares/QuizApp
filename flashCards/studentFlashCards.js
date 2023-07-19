@@ -12,27 +12,27 @@ const FlipCard = ({ front, back, isFlipped, flipCard, rotateY }) => {
   return (
     <TouchableOpacity onPress={flipCard}>
       <View style={{ alignItems: "center" }}>
-        <Animated.View
-          style={[
-            {
-              transform: [{ rotateY: `${rotateY.value}deg` }],
-              backgroundColor: isFlipped ? "orange" : "green",
-              width: "100%",
-              height: "100%",
-            },
-          ]}
+        <View
+        // style={[
+        //   {
+        //     transform: [{ rotateY: `${rotateY.value}deg` }],
+        //     backgroundColor: isFlipped ? "orange" : "green",
+        //     width: "100%",
+        //     height: "100%",
+        //   },
+        // ]}
         >
-          <Animated.Text
+          <Text
             style={{
               fontSize: 18,
-              transform: [{ rotateY: `${rotateY.value}deg` }],
+              //  transform: [{ rotateY: `${rotateY.value}deg` }],
               textAlign: "center",
               textAlignVertical: "center",
             }}
           >
             {isFlipped ? back : front}
-          </Animated.Text>
-        </Animated.View>
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );

@@ -8,11 +8,56 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import auth from "@react-native-firebase/auth";
+import {
+  setCurrentGroupCadre,
+  setCurrentGroupName,
+  setDbUser,
+  setEmailVerified,
+  setUserEmail,
+  setDbUserFirstName,
+  setDbUserLastName,
+  setDbUserMiddleName,
+  setRunAppUseEffect,
+} from "./redux/userSlice";
+import { useDispatch } from "react-redux";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const Register = (prop) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const dispatch = useDispatch();
+
+  const LogOut = async () => {
+    await auth()
+      .signOut()
+      .then(() => {
+        try {
+          GoogleSignin.signOut();
+          GoogleSignin.revokeAccess();
+        } catch (error) {
+          console.log(error.message);
+        }
+
+        //setDbUser(false);
+      })
+      .then(() => {
+        dispatch(setUserEmail(null));
+        //dispatch(setCurrentGroupCadre(null));
+        dispatch(setCurrentGroupCadre(null));
+        dispatch(setCurrentGroupName(null));
+        dispatch(setDbUser(null));
+        dispatch(setUserEmail(null));
+        dispatch(setEmailVerified(false));
+        dispatch(setDbUserFirstName(null));
+        dispatch(setDbUserLastName(null));
+        dispatch(setDbUserMiddleName(null));
+        dispatch(setRunAppUseEffect());
+
+        console.log("signed out");
+      })
+      .catch((error) => console.log(error.message));
+  };
 
   const RegisterUser = async () => {
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
@@ -26,15 +71,14 @@ const Register = (prop) => {
         .createUserWithEmailAndPassword(email, password)
         .then((credentials) => {
           credentials.user.sendEmailVerification();
-          console.log("cureent user", auth().currentUser);
-          console.log("credentials", credentials.user);
         })
 
-        .then(() =>
+        .then(() => {
+          LogOut();
           Alert.alert(
             `To sign in, Verify by clicking the link sent to ${email}`
-          )
-        )
+          );
+        })
         .catch((error) => {
           console.log("error sending messge", error.message);
           if (error.code === "auth/email-already-in-use") {

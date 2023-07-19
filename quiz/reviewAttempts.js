@@ -58,7 +58,6 @@ const ReviewAttempts = ({ navigation, route }) => {
   //     focused || setQuizIds(quizId)
   //   }
   // alterParams()
-  const scrollOffsetY = useRef(new Animated.Value(0)).current;
 
   const totalSba = (
     Array.isArray(quiz.quizQuestions) &&
@@ -178,11 +177,6 @@ const ReviewAttempts = ({ navigation, route }) => {
     }, [route.params.quizId])
   );
 
-  const topOptionBoxValue = useSharedValue(130);
-  const topOptionBox = useAnimatedStyle(() => {
-    return { height: topOptionBoxValue.value };
-  });
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -216,11 +210,6 @@ const ReviewAttempts = ({ navigation, route }) => {
                       borderTopWidth: 1,
                       borderBottomWidth: 0.5,
                       padding: 20,
-                    }}
-                    onLayout={(event) => {
-                      const layout = event.nativeEvent.layout;
-                      questionCoordinate[index] = layout.y;
-                      setQuestionCoordinate(questionCoordinate);
                     }}
                   >
                     {imageDownloadURL && (

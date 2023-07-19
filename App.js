@@ -29,6 +29,7 @@ import {
   setDbUserFirstName,
   setDbUserLastName,
   setDbUserMiddleName,
+  setRunAppUseEffect,
 } from "./redux/userSlice";
 import { NavigationContainer } from "@react-navigation/native";
 import {
@@ -90,6 +91,7 @@ function App() {
         dispatch(setDbUserFirstName(null));
         dispatch(setDbUserLastName(null));
         dispatch(setDbUserMiddleName(null));
+        dispatch(setRunAppUseEffect());
       })
       .catch((error) => {
         if (error.code === "auth/requires-recent-login") {
@@ -146,6 +148,7 @@ function App() {
         dispatch(setDbUserFirstName(null));
         dispatch(setDbUserLastName(null));
         dispatch(setDbUserMiddleName(null));
+        dispatch(setRunAppUseEffect());
 
         console.log("signed out");
       })
@@ -385,6 +388,7 @@ function App() {
               // });
               dispatch(setCurrentGroupCadre(invitedCadre));
               dispatch(setCurrentGroupName(groupToJoin));
+              dispatch(setRunAppUseEffect());
               //setInitializing(false);
               dispatch(setLoading(false));
             });
