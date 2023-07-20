@@ -8,7 +8,7 @@ import {
   Platform,
   FlatList,
 } from "react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { Text } from "react-native-paper";
 import { useSelector } from "react-redux";

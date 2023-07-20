@@ -287,6 +287,7 @@ const SigninPage = ({ navigation }) => {
                           }
                         })
                         .catch((err) => {
+                          dispatch(setLoading(false));
                           "dbUser could not be found" + err.message;
                         });
 

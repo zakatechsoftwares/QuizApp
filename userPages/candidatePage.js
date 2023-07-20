@@ -57,37 +57,36 @@ const CandidatePage = ({ navigation }) => {
   };
 
   useEffect(() => {
-    (async () => {
-      setTimeout(() => {
-        setRunUseEffect(!runUseEffect);
-      }, 2000);
+    // (async () => {
+    //   //   setTimeout(() => {
+    //   //     setRunUseEffect(!runUseEffect);
+    //   //   }, 2000);
 
-      const data = await firestore()
-        .collection("users")
-        .doc(quizGroupName)
-        .get()
-        .then(setRefreshing(false));
+    //   let data = await
+    firestore()
+      .collection("users")
+      .doc(quizGroupName)
+      .onSnapshot((data) => {
+        if (data) {
+          setRefreshing(false);
+          let quizScheduled = data.data()[quizGroupNameRaw].scheduledQuiz;
+          let quizAttempted = data.data()[quizGroupNameRaw].attemptedQuiz;
+          setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
 
-      let quizScheduled = data.data()[quizGroupNameRaw].scheduledQuiz;
-      let quizAttempteds = data.data()[quizGroupNameRaw].attemptedQuiz;
+          quizScheduled = quizScheduled.filter(
+            (element) => element.schedule.seconds - Date.now() < 86400
+          );
+          setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
+          setScheduledQuiz(quizScheduled.sort(ScheduleSortingOrder));
+        }
+      });
 
-      let quizAttempted = quizAttempteds.filter(
-        (item) => item.candidateId === dbUser.userId
-      );
+    //  console.log(quizAttempted)
+    //  console.log(quizScheduled)
+    // }
 
-      // console.log(data.data()[quizGroupNameRaw].scheduledQuiz)
-      for (element of quizAttempted) {
-        quizScheduled.map((item, i) => {
-          if (element.quizId === item.quizId) {
-            quizScheduled.splice(i, 1);
-            //setScheduledQuiz(quizScheduled.sort(ScheduleSortingOrder))
-          }
-        });
-      }
-      setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
-      setScheduledQuiz(quizScheduled.sort(ScheduleSortingOrder));
-    })();
-  }, [runUseEffect]);
+    //  )();
+  }, []);
 
   return (
     <View style={{ marginTop: Platform.OS == "ios" ? 20 : 30 }}>

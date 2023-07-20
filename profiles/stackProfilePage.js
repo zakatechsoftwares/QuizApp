@@ -16,8 +16,6 @@ import { useSelector } from "react-redux";
 const Stack = createNativeStackNavigator();
 
 const StackProfilePage = ({ navigation }) => {
-  const navState = navigation.getState();
-  console.log(navState);
   let dbUserFirstName = useSelector((state) => state.user).dbUserFirstName;
   let userCurrentGroupCadre = useSelector(
     (state) => state.user
@@ -28,10 +26,6 @@ const StackProfilePage = ({ navigation }) => {
   return (
     <Stack.Navigator //initialRouteName='Profile'
     >
-      {paymentStatus === false && dbUserFirstName ? ( //paymentStatus &&
-        <Stack.Screen name="Payment" component={PaymentPage} />
-      ) : null}
-
       {dbUserFirstName &&
         userCurrentGroupCadre && ( //paymentStatus &&
           <Stack.Screen
@@ -99,6 +93,9 @@ const StackProfilePage = ({ navigation }) => {
         component={ContactUsPage}
         options={{ title: "Contact Us", headerShown: true }}
       />
+      {paymentStatus === false && dbUserFirstName ? ( //paymentStatus &&
+        <Stack.Screen name="Payment" component={PaymentPage} />
+      ) : null}
     </Stack.Navigator>
   );
 };

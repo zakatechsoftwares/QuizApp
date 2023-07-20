@@ -22,6 +22,7 @@ const initialState = {
   dbUserFirstName: null,
   dbUserLastName: null,
   dbUserMiddleName: null,
+  openGroupList: false,
 };
 
 const fetchUser = createAsyncThunk("DbUser/fetchUser", async (userId) => {
@@ -97,6 +98,9 @@ const userSlice = createSlice({
     setDbUserMiddleName: (state, action) => {
       state.dbUserMiddleName = action.payload;
     },
+    setOpenGroupList: (state, action) => {
+      state.openGroupList = action.payload;
+    },
   },
   // extraReducers: (builder) => {
   //   builder
@@ -136,6 +140,7 @@ export const {
   setDbUserFirstName,
   setDbUserLastName,
   setDbUserMiddleName,
+  setOpenGroupList,
 } = userSlice.actions;
 //export { fetchUser };
 export default store;

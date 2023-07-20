@@ -56,19 +56,17 @@ const ChiefExaminerPage = ({ navigation }) => {
   };
 
   useEffect(() => {
-    (async () => {
-      let timer = setTimeout(() => {
-        setRunUseEffect(!runUseEffect);
-      }, 6000);
-      () => {
-        return clearTimeout(timer);
-      };
+    // (async () => {
+    //   //   setTimeout(() => {
+    //   //     setRunUseEffect(!runUseEffect);
+    //   //   }, 2000);
 
-      firestore()
-        .collection("users")
-        .doc(quizGroupName)
-        .get()
-        .then((data) => {
+    //   let data = await
+    firestore()
+      .collection("users")
+      .doc(quizGroupName)
+      .onSnapshot((data) => {
+        if (data) {
           setRefreshing(false);
           let quizScheduled = data.data()[quizGroupNameRaw].scheduledQuiz;
           let quizAttempted = data.data()[quizGroupNameRaw].attemptedQuiz;
@@ -79,12 +77,15 @@ const ChiefExaminerPage = ({ navigation }) => {
           );
           setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
           setScheduledQuiz(quizScheduled.sort(ScheduleSortingOrder));
-        })
-        .catch((err) => setAttemptedQuiz([]) && setScheduledQuiz([]));
-      //  console.log(quizAttempted)
-      //  console.log(quizScheduled)
-    })();
-  }, [runUseEffect]);
+        }
+      });
+
+    //  console.log(quizAttempted)
+    //  console.log(quizScheduled)
+    // }
+
+    //  )();
+  }, []);
 
   const standardDeviation = (arr, usePopulation = false) => {
     const mean = arr.reduce((acc, val) => acc + val, 0) / arr.length;

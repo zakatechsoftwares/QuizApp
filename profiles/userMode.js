@@ -21,15 +21,16 @@ import {
   setCurrentGroupCadre,
   setCurrentGroupName,
   setRunAppUseEffect,
+  setOpenGroupList,
 } from "../redux/userSlice";
 
 const UserMode = () => {
   const dispatch = useDispatch();
   let dbUser = JSON.parse(useSelector((state) => state.user).DbUser);
   let userId = useSelector((state) => state.user).userId;
+  let openGroupList = useSelector((state) => state.user).openGroupList;
 
   const [groupName, setGroupName] = useState("");
-  const [openGroupList, setOpenGroupList] = useState(false);
 
   const [groupNameError, setGroupNameError] = useState(false);
   let [groupMembership, setGroupMembership] = useState([]);
@@ -200,7 +201,7 @@ const UserMode = () => {
               <View style={styles.touchable}>
                 <TouchableOpacity
                   activeOpacity={0.2}
-                  onPress={() => setOpenGroupList(!openGroupList)}
+                  onPress={() => dispatch(setOpenGroupList(!openGroupList))}
                   style={[styles.touchableOpacityStyle]}
                 >
                   <Text style={styles.touchableText}>

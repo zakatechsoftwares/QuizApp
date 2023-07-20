@@ -49,30 +49,36 @@ const ExaminerPage = ({ navigation }) => {
   };
 
   useEffect(() => {
-    (async () => {
-      setTimeout(() => {
-        setRunUseEffect(!runUseEffect);
-      }, 2000);
+    // (async () => {
+    //   //   setTimeout(() => {
+    //   //     setRunUseEffect(!runUseEffect);
+    //   //   }, 2000);
 
-      let data = await firestore()
-        .collection("users")
-        .doc(quizGroupName)
-        .get()
-        .then(setRefreshing(false));
-      let quizScheduled = data.data()[quizGroupNameRaw].scheduledQuiz;
-      let quizAttempted = data.data()[quizGroupNameRaw].attemptedQuiz;
-      setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
+    //   let data = await
+    firestore()
+      .collection("users")
+      .doc(quizGroupName)
+      .onSnapshot((data) => {
+        if (data) {
+          setRefreshing(false);
+          let quizScheduled = data.data()[quizGroupNameRaw].scheduledQuiz;
+          let quizAttempted = data.data()[quizGroupNameRaw].attemptedQuiz;
+          setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
 
-      quizScheduled = quizScheduled.filter(
-        (element) => element.schedule.seconds - Date.now() < 86400
-      );
-      setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
-      setScheduledQuiz(quizScheduled.sort(ScheduleSortingOrder));
+          quizScheduled = quizScheduled.filter(
+            (element) => element.schedule.seconds - Date.now() < 86400
+          );
+          setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
+          setScheduledQuiz(quizScheduled.sort(ScheduleSortingOrder));
+        }
+      });
 
-      //  console.log(quizAttempted)
-      //  console.log(quizScheduled)
-    })();
-  }, [runUseEffect]);
+    //  console.log(quizAttempted)
+    //  console.log(quizScheduled)
+    // }
+
+    //  )();
+  }, []);
 
   const standardDeviation = (arr, usePopulation = false) => {
     const mean = arr.reduce((acc, val) => acc + val, 0) / arr.length;
@@ -144,7 +150,9 @@ const ExaminerPage = ({ navigation }) => {
                 </Text>
               )}
               {item.score && (
-                <Text variant="titleLarge">Score Mean: {scoreMean}</Text>
+                <Text variant="titleLarge">
+                  Score Mean: {scoreMean.toFixed(2)}
+                </Text>
               )}
 
               {item.schedule && (

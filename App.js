@@ -30,6 +30,7 @@ import {
   setDbUserLastName,
   setDbUserMiddleName,
   setRunAppUseEffect,
+  setOpenGroupList,
 } from "./redux/userSlice";
 import { NavigationContainer } from "@react-navigation/native";
 import {
@@ -159,7 +160,7 @@ function App() {
     //let passKey = base64.decode(passKey)
     let key = passKey.substring(passKey.indexOf("~") + 1);
     key = key.trim(); //remove spaces before and after the string
-    console.log("passkey" + passKey);
+
     let groupToJoin = passKey
       .substring(passKey.indexOf("?") + 1, passKey.indexOf("~"))
       .replace(/\+/g, " ");
@@ -386,10 +387,8 @@ function App() {
               //   name: groupToJoin,
               //   cadre: invitedCadre,
               // });
-              dispatch(setCurrentGroupCadre(invitedCadre));
-              dispatch(setCurrentGroupName(groupToJoin));
-              dispatch(setRunAppUseEffect());
-              //setInitializing(false);
+              dispatch(setOpenGroupList(true));
+              Alert.alert(`You successfully joined ${groupName}`);
               dispatch(setLoading(false));
             });
         } else {
@@ -423,7 +422,7 @@ function App() {
               //   Alert.alert("Signin and click the link again");
               // }
             } else {
-              Alert.alert("Signin and click the link again");
+              // Alert.alert("Signin and click the link again");
             }
           }
         }
@@ -449,7 +448,7 @@ function App() {
               // handleDynamicLink({link, usrId});
             }
           } else {
-            Alert.alert("Signin and click the link again");
+            // Alert.alert("Signin and click the link again");
           }
         });
     } else {
@@ -463,6 +462,7 @@ function App() {
         dispatch(setEmailVerified(credentials.emailVerified));
         dispatch(setUserEmail(credentials.email));
         dispatch(setUserId(credentials.uid));
+        dispatch(setLoading(false));
         if (!credentials?.emailVerified) {
           Alert.alert("Click on the link sent to your mail and then sign in");
           // LogOut();
@@ -523,7 +523,7 @@ function App() {
         dispatch(setLoading(false));
       }
     });
-
+    dispatch(setLoading(false));
     return subscriber;
   }, [currentGroupName, runAppUseEffect]);
 
@@ -706,7 +706,7 @@ function App() {
                   }
                 />
 
-                {/* {paymentStatus || (
+                {paymentStatus || (
                   <DrawerItem
                     label="Subscribe"
                     onPress={() =>
@@ -715,7 +715,7 @@ function App() {
                       })
                     }
                   />
-                )} */}
+                )}
 
                 <DrawerItem
                   label="About the App"
@@ -737,9 +737,10 @@ function App() {
 
                 <DrawerItem label="Sign Out" onPress={LogOut} />
 
-                {dbUserFirstName && (
+                {
+                  //dbUserFirstName &&
                   <DrawerItem label="Delete Account" onPress={wantToDelete} />
-                )}
+                }
               </DrawerContentScrollView>
             );
           }}

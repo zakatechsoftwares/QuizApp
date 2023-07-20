@@ -101,33 +101,6 @@ Do NOT share the key as it can be used only once:${arg}`,
             .catch((error) => {
               // Handle error
             });
-
-          //           Share.open({
-          //             title: `Click the following link to join ${groupName} as ${invitedCadre}`,
-          //             message: `Click the following link to join ${groupName} as ${invitedCadre}
-          // Do NOT share the key as it can be used only once`,
-          //             url: arg,
-          //             email: "zakatechsoftware@gmail.com",
-          //           })
-          //             .then((res) => {
-          //               firestore()
-          //                 .collection("users")
-          //                 .doc(quizGroupName)
-          //                 .update({
-          //                   [`${quizGroupNameRaw}.examinerPass`]:
-          //                     firestore.FieldValue.arrayUnion({
-          //                       cadre: invitedCadre,
-          //                       passKey: passKey,
-          //                     }),
-          //                 })
-          //                 .then(() => {
-          //                   Alert.alert("Invitation link sent");
-          //                 })
-          //                 .catch((e) => Alert.alert("An error has occured"));
-          //             })
-          //             .catch((err) => {
-          //               err && console.log(err);
-          //             });
         });
     } else setRoleError(true);
   };
@@ -158,21 +131,17 @@ Do NOT share the key as it can be used only once:${arg}`,
   };
 
   useEffect(() => {
-    (async () => {
-      let timer = setTimeout(() => {
-        setRunUseEffect(!runUseEffect);
-      }, 60000);
-      () => {
-        return clearTimeout(timer);
-      };
+    // (async () => {
+    //   //   setTimeout(() => {
+    //   //     setRunUseEffect(!runUseEffect);
+    //   //   }, 2000);
 
-      //   const docRef = doc(db, 'users', 'Questions')
-      // const data = await
-      firestore()
-        .collection("users")
-        .doc(quizGroupName)
-        .get()
-        .then((data) => {
+    //   let data = await
+    firestore()
+      .collection("users")
+      .doc(quizGroupName)
+      .onSnapshot((data) => {
+        if (data) {
           setRefreshing(false);
           let quizScheduled = data.data()[quizGroupNameRaw].scheduledQuiz;
           let quizAttempted = data.data()[quizGroupNameRaw].attemptedQuiz;
@@ -181,15 +150,17 @@ Do NOT share the key as it can be used only once:${arg}`,
           quizScheduled = quizScheduled.filter(
             (element) => element.schedule.seconds - Date.now() < 86400
           );
-
           setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
           setScheduledQuiz(quizScheduled.sort(ScheduleSortingOrder));
-        })
-        .catch((err) => setAttemptedQuiz([]) && setScheduledQuiz([]));
-      //  console.log(quizAttempted)
-      //  console.log(quizScheduled)
-    })();
-  }, [runUseEffect]);
+        }
+      });
+
+    //  console.log(quizAttempted)
+    //  console.log(quizScheduled)
+    // }
+
+    //  )();
+  }, []);
 
   const standardDeviation = (arr, usePopulation = false) => {
     const mean = arr.reduce((acc, val) => acc + val, 0) / arr.length;
