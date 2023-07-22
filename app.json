@@ -12,10 +12,10 @@
       "backgroundColor": "#ffffff"
     },
     "plugins": [
+      "@react-native-google-signin/google-signin",
       "@react-native-firebase/app",
       "@react-native-firebase/perf",
       "@react-native-firebase/crashlytics",
-      "expo-build-properties",
       [
         "expo-build-properties",
         {
@@ -39,7 +39,7 @@
       },
       "googleServicesFile": "./google-services.json",
       "package": "com.zakatechsoftware.QuizApp",
-      "versionCode": 8
+      "versionCode": 11
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -49,5 +49,8 @@
         "projectId": "ed16f0bb-ab3f-4aed-b1d7-d4754ef161ad"
       }
     }
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-1200533271102374~3975533015"
   }
 }

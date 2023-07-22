@@ -22,6 +22,8 @@ const initialState = {
   dbUserFirstName: null,
   dbUserLastName: null,
   dbUserMiddleName: null,
+  dbUserDateJoined: null,
+  dbUserExempted: null,
   openGroupList: false,
 };
 
@@ -98,6 +100,12 @@ const userSlice = createSlice({
     setDbUserMiddleName: (state, action) => {
       state.dbUserMiddleName = action.payload;
     },
+    setDbUserDateJoined: (state, action) => {
+      state.setDbUserDateJoined = action.payload;
+    },
+    setDbUserExempted: (state, action) => {
+      state.setDbUserExempted = action.payload;
+    },
     setOpenGroupList: (state, action) => {
       state.openGroupList = action.payload;
     },
@@ -141,6 +149,8 @@ export const {
   setDbUserLastName,
   setDbUserMiddleName,
   setOpenGroupList,
+  setDbUserExempted,
+  setDbUserDateJoined,
 } = userSlice.actions;
 //export { fetchUser };
 export default store;

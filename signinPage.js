@@ -30,6 +30,8 @@ import {
   setDbUserFirstName,
   setDbUserLastName,
   setDbUserMiddleName,
+  setDbUserDateJoined,
+  setDbUserExempted,
 } from "./redux/userSlice";
 import firestore from "@react-native-firebase/firestore";
 
@@ -43,7 +45,7 @@ const SigninPage = ({ navigation }) => {
   const [show, setShow] = useState(false);
 
   async function onGoogleButtonPress() {
-    setInitializing(true);
+    dispatch(setLoading(true));
     // Check if your device supports Google Play
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     setInitializing(true);
@@ -72,6 +74,7 @@ const SigninPage = ({ navigation }) => {
 
   const Login = async () => {
     if (email && password) {
+      dispatch(setLoading(true));
       auth()
         .signInWithEmailAndPassword(email, password)
         .then((credentials) => {
@@ -118,6 +121,8 @@ const SigninPage = ({ navigation }) => {
                     dispatch(setDbUserFirstName(user.firstName));
                     dispatch(setDbUserLastName(user.lastName));
                     dispatch(setDbUserMiddleName(user.middleNameName));
+                    dispatch(setDbUserDateJoined(user.dateJoined));
+                    dispatch(setDbUserExempted(user.exempted));
 
                     dispatch(setUserId(credentials.uid));
                     dispatch(setPaymentStatus(paid));
@@ -177,7 +182,7 @@ const SigninPage = ({ navigation }) => {
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
-        "672892446980-4lu6df2v8dq9p6mpvtm9hkhu4nk9t8tp.apps.googleusercontent.com",
+        "672892446980-830nchecssacmblj94l0ka7o3q843gom.apps.googleusercontent.com",
       offlineAccess: true,
     });
     setInitializing(false);
@@ -283,7 +288,8 @@ const SigninPage = ({ navigation }) => {
                             setInitializing(false);
                             dispatch(setUserId(credentials.uid));
                             dispatch(setPaymentStatus(paid));
-                            Alert.alert(user.email);
+                            dispatch(setDbUserDateJoined(user.dateJoined));
+                            dispatch(setDbUserExempted(user.exempted));
                           }
                         })
                         .catch((err) => {

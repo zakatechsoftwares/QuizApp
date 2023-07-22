@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "672892446980-tu3l79sc3d0erdogkjvrirt1etigmpr9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zakatechsoftware.QuizApp",
+            "certificate_hash": "4615fe7a13e9b5dfa6925e6093332227ed4ea084"
+          }
+        },
+        {
           "client_id": "672892446980-830nchecssacmblj94l0ka7o3q843gom.apps.googleusercontent.com",
           "client_type": 3
         }

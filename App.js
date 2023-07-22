@@ -31,6 +31,8 @@ import {
   setDbUserMiddleName,
   setRunAppUseEffect,
   setOpenGroupList,
+  setDbUserDateJoined,
+  setDbUserExempted,
 } from "./redux/userSlice";
 import { NavigationContainer } from "@react-navigation/native";
 import {
@@ -45,6 +47,26 @@ import StackQuestionPage from "./question/stackQuestionPage";
 import StackQuizPage from "./quiz/stackQuizPage";
 import FlashCardStack from "./flashCards/flashCardStack";
 import dynamicLinks from "@react-native-firebase/dynamic-links";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+  InterstitialAd,
+  AdEventType,
+} from "react-native-google-mobile-ads";
+import messaging from "@react-native-firebase/messaging";
+
+const adUnitIdBanner = __DEV__
+  ? TestIds.BANNER
+  : "ca-app-pub-1200533271102374/6694029841";
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : "ca-app-pub-1200533271102374/7558403424";
+
+const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+  requestNonPersonalizedAdsOnly: true,
+  keywords: ["fashion", "clothing", "education", "quiz", "examinations", ""],
+});
 
 const Drawer = createDrawerNavigator();
 
@@ -55,6 +77,8 @@ function App() {
   let dbUserFirstName = useSelector((state) => state.user).dbUserFirstName;
   let dbUserLastName = useSelector((state) => state.user).dbUserLastName;
   let dbUserMiddleName = useSelector((state) => state.user).dbUserMiddleName;
+  let dbUserDateJoined = useSelector((state) => state.user).dbUserDateJoined;
+  let dbUserExempted = useSelector((state) => state.user).dbUserExempted;
   let dbUserError = useSelector((state) => state.user).errorMessage;
   let userEmail = useSelector((state) => state.user).userEmail;
   let userId = useSelector((state) => state.user).userId;
@@ -70,6 +94,17 @@ function App() {
   const groupName = quizGroupNameRaw.substring(
     quizGroupNameRaw.indexOf("-") + 1
   );
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      Alert.alert(
+        remoteMessage.notification.title,
+        remoteMessage.notification.body
+      );
+    });
+
+    return unsubscribe;
+  }, []);
 
   const deleteAccount = async () => {
     firestore()
@@ -190,10 +225,10 @@ function App() {
           passFiltered?.length > 0 &&
           passKey // && groupMemberships.length<1
         ) {
-          pass.splice(
-            pass.findIndex((item) => item.passKey === key),
-            1
-          );
+          // pass.splice(
+          //   pass.findIndex((item) => item.passKey === key),
+          //   1
+          // );
 
           firestore()
             .collection("users")
@@ -203,184 +238,96 @@ function App() {
             })
             .then(async () => {
               const docRef = firestore().collection("users").doc(userId);
+              let doc = await docRef.get();
+
+              let groupMembership = doc.data().groupMembership;
+
               // const docRef2 = firestore().collection('users').doc(groupToJoinId);
-
-              docRef.get().then((doc) => {
-                let data = doc.data();
-
-                // Find the index of the object that contains the attribute value to remove
-                const indexToRemove = data.groupMembership.findIndex(
-                  (element) =>
-                    element.name === groupToJoin && element.cadre !== "Admin"
+              if (
+                Array.isArray(groupMembership) &&
+                groupMembership.length > 0
+              ) {
+                let updatedGroupMemberships = groupMembership.filter(
+                  (ele) => ele.name !== groupToJoin || ele.cadre === "Admin"
                 );
+                updatedGroupMemberships = [
+                  ...updatedGroupMemberships,
+                  {
+                    cadre: invitedCadre,
+                    name: groupToJoin,
+                  },
+                ];
+                //console.log("updatedGroupMemberships", updatedGroupMemberships);
 
-                if (indexToRemove !== -1 && data.userId === userId) {
-                  // Remove the object from the array using the splice method
-                  data.groupMembership.splice(indexToRemove, 1);
-
-                  // Update the document with the modified array
-                  docRef
-                    .update({
-                      groupMembership: [
-                        ...data.groupMembership,
-                        {
-                          cadre: invitedCadre,
-                          name: groupToJoin,
-                        },
-                      ],
-                    })
-                    .then(() => {
-                      // setInitializing(false);
-                      dispatch(setLoading(false));
-                    })
-                    .catch((error) => {
-                      // setInitializing(false);
-                      dispatch(setLoading(false));
-                      Alert.alert("An error has occurred");
-                      // console.error('Error updating document: ', error);
-                    });
-                } else {
-                  const indexToRemove2 = data.groupMembership.findIndex(
-                    (element) => element.name === groupToJoin
+                docRef
+                  .update({
+                    groupMembership: updatedGroupMemberships,
+                  })
+                  .catch((err) =>
+                    Alert.alert(
+                      "groupMembership could not be added",
+                      err.message
+                    )
                   );
-
-                  if (indexToRemove2 === -1) {
-                    docRef
-                      .update({
-                        groupMembership: [
-                          ...data.groupMembership,
-                          {
-                            cadre: invitedCadre,
-                            name: groupToJoin,
-                          },
-                        ],
-                      })
-                      .then(
-                        dispatch(setLoading(false)) //setInitializing(false)
-                      )
-                      .catch((err) => console.log(err.message));
-                  }
-                }
-              });
+              } else {
+                // console.log("updateGroupMembership1", [
+                //   {
+                //     cadre: invitedCadre,
+                //     name: groupToJoin,
+                //   },
+                // ]);
+                docRef.update({
+                  groupMembership: [
+                    {
+                      cadre: invitedCadre,
+                      name: groupToJoin,
+                    },
+                  ],
+                });
+              }
             })
 
             .then(async () => {
-              // const docRef = firestore().collection('users').doc(userId);
               const docRef2 = firestore()
                 .collection("users")
                 .doc(groupToJoinId);
 
-              docRef2.get().then(
-                (doc) => {
-                  let data = doc.data()[groupToJoin];
-                  let data2 = doc.data().groupMembership;
-
-                  // Find the index of the object that contains the attribute value to remove
-                  const indexToRemove = data.members.findIndex(
-                    (element) => element.userId === user.uid
-                  );
-                  const indexToRemove2 = data2.findIndex(
-                    (element) => element.name === groupToJoin
-                  );
-
-                  if (indexToRemove !== -1) {
-                    // Remove the object from the array using the splice method
-                    let updatedMembers = data.members.splice(indexToRemove, 1);
-                    updatedMembers = [
-                      ...data.members,
-                      {
-                        dateJoin: Date.now(),
-                        cadre: invitedCadre,
-                        userId: userId,
-                        firstName: dbUserFirstName,
-                        middleName: dbUserLastName,
-                        middleName: dbUserMiddleName,
-                        email: userEmail,
-                      },
-                    ];
-
-                    let updatedData = {
-                      ...data,
-                      members: updatedMembers,
-                    };
-
-                    // Update the document with the modified array
-                    docRef2
-                      .update({
-                        [`${groupToJoin}`]: updatedData,
-                        // [`${groupToJoin}.members`]:
-
-                        // [...data.members,
-                        //        {
-                        //           dateJoin: Date.now(),
-                        //           cadre : invitedCadre,
-                        //           userId : userId,
-                        //           firstName: dbUserFirstName,
-                        //           middleName: dbUserLastName,
-                        //           middleName: dbUserMiddleName,
-                        //           email : userEmail
-                        //         }
-                        //       ]
-                      })
-                      .then(
-                        dispatch(setLoading(false)) //setInitializing(false)
-                      )
-
-                      .catch((error) => {
-                        Alert.alert("An error has occurred: " + error.message);
-                        //console.error('Error updating document: ', error);
-                        //setInitializing(false);
-                        dispatch(setLoading(false));
-                      });
-                  } else {
-                    let updatedMembers = [
-                      ...data.members,
-                      {
-                        dateJoin: Date.now(),
-                        cadre: invitedCadre,
-                        userId: userId,
-                        firstName: dbUserFirstName,
-                        middleName: dbUserLastName,
-                        middleName: dbUserMiddleName,
-                        email: userEmail,
-                      },
-                    ];
-
-                    let updatedData = {
-                      ...data,
-                      members: updatedMembers,
-                    };
-
-                    // if(indexToRemove2===-1)
-                    // {
-                    docRef2
-                      .update({
-                        [`${groupToJoin}`]: updatedData,
-                        // [`${groupToJoin}.members`]: [...data.members,
-                        //        {
-                        //           dateJoin: Date.now(),
-                        //           cadre : invitedCadre,
-                        //           userId : userId,
-                        //           firstName: dbUserFirstName,
-                        //           middleName: dbUserLastName,
-                        //           middleName: dbUserMiddleName,
-                        //           email : userEmail
-                        //         }
-                        //       ]
-                      })
-                      .then(
-                        dispatch(setLoading(false)) //setInitializing(false)
-                      )
-                      .catch((error) => {
-                        Alert.alert("An error has occurred: " + error.message);
-                        // console.error('Error updating document: ', error);
-                        // setInitializing(false);
-                        dispatch(setLoading(false));
-                      });
-                  }
-                }
-                //  }
-              );
+              let members = arg.data()[groupToJoin].members;
+              if (Array.isArray(members) && members.length > 0) {
+                let updatedMembers = members.filter(
+                  (ele) => ele.userId !== userId
+                );
+                updatedMembers = [
+                  ...updatedMembers,
+                  {
+                    dateJoin: Date.now(),
+                    cadre: invitedCadre,
+                    userId: userId,
+                    firstName: dbUserFirstName,
+                    lastName: dbUserLastName,
+                    middleName: dbUserMiddleName,
+                    email: userEmail,
+                  },
+                ];
+                //  console.log("updatedMembers", updatedMembers);
+                docRef2.update({
+                  [`${groupToJoin}.members`]: updatedMembers,
+                });
+              } else {
+                docRef2.update({
+                  [`${groupToJoin}.members`]: [
+                    {
+                      dateJoin: Date.now(),
+                      cadre: invitedCadre,
+                      userId: userId,
+                      firstName: dbUserFirstName,
+                      lastName: dbUserLastName,
+                      middleName: dbUserMiddleName,
+                      email: userEmail,
+                    },
+                  ],
+                });
+              }
             })
             .then(() => {
               // setCurrentGroup({
@@ -389,6 +336,11 @@ function App() {
               // });
               dispatch(setOpenGroupList(true));
               Alert.alert(`You successfully joined ${groupName}`);
+              dispatch(setLoading(false));
+              dispatch(setRunAppUseEffect(!runAppUseEffect));
+            })
+            .catch((err) => {
+              Alert.alert(err.message);
               dispatch(setLoading(false));
             });
         } else {
@@ -462,7 +414,8 @@ function App() {
         dispatch(setEmailVerified(credentials.emailVerified));
         dispatch(setUserEmail(credentials.email));
         dispatch(setUserId(credentials.uid));
-        dispatch(setLoading(false));
+        dispatch(setLoading(true));
+
         if (!credentials?.emailVerified) {
           Alert.alert("Click on the link sent to your mail and then sign in");
           // LogOut();
@@ -504,10 +457,15 @@ function App() {
                     dispatch(setDbUserLastName(user.lastName));
                     dispatch(setDbUserMiddleName(user.middleNameName));
                     dispatch(setPaymentStatus(paid));
+                    dispatch(setDbUserDateJoined(user.dateJoined));
+                    dispatch(setDbUserExempted(user.exempted));
+                  } else {
+                    dispatch(setLoading(false));
                   }
                 })
                 .catch((err) => {
                   "dbUser could not be found" + err.message;
+                  dispatch(setLoading(false));
                 });
 
               // let data = JSON.stringify({ user, paid });
@@ -516,6 +474,7 @@ function App() {
             } catch (error) {
               // Alert.alert("Error fetching user:", error);
               console.log(error.message);
+              dispatch(setLoading(false));
             }
           })();
         }
@@ -523,9 +482,33 @@ function App() {
         dispatch(setLoading(false));
       }
     });
-    dispatch(setLoading(false));
+
     return subscriber;
   }, [currentGroupName, runAppUseEffect]);
+
+  useEffect(() => {
+    const unsubscribe = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        if (
+          // (paymentStatus === false &&
+          //   Date.now() - dbUser?.dateJoined < 7 * 86400000) ||
+          // (paymentStatus === false &&
+          //   Date.now() - dbUser?.dateJoined > 7 * 86400000)
+          paymentStatus === false ||
+          dbUserExempted === true // && dbUser?.payments?.length===0
+        ) {
+          interstitial.show();
+        }
+      }
+    );
+
+    // Start loading the interstitial straight away
+    interstitial.load();
+
+    // Unsubscribe from events on unmount
+    return unsubscribe;
+  }, []);
 
   if (loading) {
     return (
@@ -565,6 +548,7 @@ function App() {
                   onPress={() => {
                     dispatch(setCurrentGroupCadre(null));
                     dispatch(setCurrentGroupName(null));
+                    dispatch(setRunAppUseEffect(!runAppUseEffect));
                   }}
                 />
                 {/* <TouchableOpacity>
@@ -801,7 +785,30 @@ function App() {
             />
           )}
         </Drawer.Navigator>
-
+        {/* {((paymentStatus === false &&
+          Date.now() - dbUserDateJoined < 7 * 86400000) ||
+          (paymentStatus === false &&
+            Date.now() - dbUserDateJoined > 7 * 86400000) ||
+          dbUserExempted === true) && ( */}
+        <View
+          style={{
+            justifyContent: "center",
+            width: "100%", //borderWidth:2,
+            marginTop: Platform.OS === "ios" ? 0 : 20,
+            alignItems: "center",
+            alignSelf: "center",
+            borderRadius: 10,
+            flexDirection: "row",
+          }}
+        >
+          <BannerAd
+            unitId={adUnitIdBanner}
+            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+            requestOptions={{
+              requestNonPersonalizedAdsOnly: true,
+            }}
+          />
+        </View>
         {/* )} */}
       </NavigationContainer>
     );
