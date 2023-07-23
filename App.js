@@ -95,7 +95,37 @@ function App() {
     quizGroupNameRaw.indexOf("-") + 1
   );
 
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      console.log("Authorization status:", authStatus);
+    }
+  }
+
   useEffect(() => {
+    messaging().onNotificationOpenedApp((remoteMessage) => {
+      Alert.alert(
+        remoteMessage.notification.title,
+        remoteMessage.notification.body
+      );
+    });
+
+    // Check whether an initial notification is available
+    messaging()
+      .getInitialNotification()
+      .then((remoteMessage) => {
+        if (remoteMessage) {
+          Alert.alert(
+            remoteMessage.notification.title,
+            remoteMessage.notification.body
+          );
+        }
+      });
+
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       Alert.alert(
         remoteMessage.notification.title,
@@ -359,8 +389,11 @@ function App() {
         dispatch(setLoading(false));
       });
   };
-
+  console.log(auth().currentUser);
+  // auth().currentUser.signOut();
   useEffect(() => {
+    LogOut();
+    // auth().currentUser.signOut();
     if (isMounted.current === true) {
       dynamicLinks().onLink(
         //handleDynamicLink
@@ -416,7 +449,7 @@ function App() {
         dispatch(setUserId(credentials.uid));
         dispatch(setLoading(true));
 
-        if (!credentials?.emailVerified) {
+        if (credentials?.emailVerified === false) {
           Alert.alert("Click on the link sent to your mail and then sign in");
           // LogOut();
           dispatch(setLoading(false));

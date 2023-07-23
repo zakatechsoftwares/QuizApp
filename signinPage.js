@@ -183,9 +183,13 @@ const SigninPage = ({ navigation }) => {
     GoogleSignin.configure({
       webClientId:
         "672892446980-830nchecssacmblj94l0ka7o3q843gom.apps.googleusercontent.com",
+      androidClientId:
+        "672892446980-f809683u73trv39ggopqe5l3gkl2fjn8.apps.googleusercontent.com",
       offlineAccess: true,
+      scopes: ["https://www.googleapis.com/auth/userinfo.email"],
     });
     setInitializing(false);
+    dispatch(setLoading(false));
   }, []);
 
   return (
@@ -303,6 +307,7 @@ const SigninPage = ({ navigation }) => {
                     } catch (error) {
                       // Alert.alert("Error fetching user:", error);
                       throw error?.message;
+                      dispatch(setLoading(false));
                     }
                   })();
                 })

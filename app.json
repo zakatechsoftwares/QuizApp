@@ -39,7 +39,7 @@
       },
       "googleServicesFile": "./google-services.json",
       "package": "com.zakatechsoftware.QuizApp",
-      "versionCode": 11
+      "versionCode": 12
     },
     "web": {
       "favicon": "./assets/favicon.png"
