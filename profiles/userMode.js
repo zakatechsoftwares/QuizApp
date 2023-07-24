@@ -29,6 +29,7 @@ const UserMode = () => {
   let dbUser = JSON.parse(useSelector((state) => state.user).DbUser);
   let userId = useSelector((state) => state.user).userId;
   let openGroupList = useSelector((state) => state.user).openGroupList;
+  let runAppUseEffect = useSelector((state) => state.user).runAppUseEffect;
 
   const [groupName, setGroupName] = useState("");
 
@@ -37,7 +38,7 @@ const UserMode = () => {
 
   useEffect(() => {
     setGroupMembership(dbUser?.groupMembership);
-  }, []);
+  }, [runAppUseEffect]);
 
   const exitGroup = async (groupToExit) => {
     let groupToExitId = groupToExit.substring(0, groupToExit.indexOf("-"));

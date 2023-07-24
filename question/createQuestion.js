@@ -56,28 +56,26 @@ const CreateQuestion = ({ navigation, route }) => {
   let userEmail = useSelector((state) => state.user).userEmail;
   const trueOrFalse = ["True", "False"];
 
-  const initialValue = item
-    ? item
-    : {
-        questionId: Math.random().toString(36).substring(2, 12),
-        author: userEmail,
+  const initialValue = {
+    questionId: Math.random().toString(36).substring(2, 12),
+    author: userEmail,
 
-        subject: "Course",
-        questionType: "",
-        question: "",
-        answers: [
-          {
-            answerId: Math.random().toString(36).substring(2, 7),
-            answer: "",
-            is_correct: "False",
-            choice: "", //Add 'choice' to ease Marking Multiple Choice questions in attempte
-          },
-        ],
-        imageCaption: "",
-        imageDownloadURL: "",
-        image: "",
-        answerExplanation: "",
-      };
+    subject: "Course",
+    questionType: "",
+    question: "",
+    answers: [
+      {
+        answerId: Math.random().toString(36).substring(2, 7),
+        answer: "",
+        is_correct: "False",
+        choice: "", //Add 'choice' to ease Marking Multiple Choice questions in attempte
+      },
+    ],
+    imageCaption: "",
+    imageDownloadURL: "",
+    image: "",
+    answerExplanation: "",
+  };
 
   const [initialValues, setInitialValues] = useState(initialValue);
 
@@ -170,9 +168,9 @@ const CreateQuestion = ({ navigation, route }) => {
               onSubmit(values).then(() => {
                 navigation.goBack();
                 actions.setSubmitting(false);
-                actions.resetForm({
-                  values: initialValue,
-                });
+              });
+              actions.resetForm({
+                values: initialValue,
               });
             }}
           >

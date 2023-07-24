@@ -98,14 +98,12 @@ const ChooseQuizQuestion = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-    (async () => {
-      // const docRef = doc(db, 'users', 'Questions')
-      const data = await firestore()
-        .collection("users")
-        .doc(quizGroupName)
-        .get(); //await getDoc(docRef)//.data()//.questionBank
-      setQuestions(data.data()[quizGroupNameRaw].questionBank);
-    })();
+    firestore()
+      .collection("users")
+      .doc(quizGroupName)
+      .onSnapshot((data) => {
+        setQuestions(data.data()[quizGroupNameRaw].questionBank);
+      });
   }, []);
 
   const ReleaseResult = [

@@ -1,73 +1,50 @@
 {
   "project_info": {
-    "project_number": "672892446980",
-    "project_id": "quiz-app-9fbed",
-    "storage_bucket": "quiz-app-9fbed.appspot.com"
+    "project_number": "505311216624",
+    "project_id": "the-quizap",
+    "storage_bucket": "the-quizap.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:672892446980:android:8a2cce4cdae3eec37e8851",
+        "mobilesdk_app_id": "1:505311216624:android:20d53010810d52efe31335",
         "android_client_info": {
-          "package_name": "com.zakatechsoftware.QuizApp"
+          "package_name": "com.zakatechsoftware.QuizAp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "672892446980-012ut8bcmaievlbqgjng063l096qmppe.apps.googleusercontent.com",
+          "client_id": "505311216624-i79c4ri96jlgotslp9h0k3aa9hpts0eh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.zakatechsoftware.QuizApp",
-            "certificate_hash": "1c5cad86e7f10c554edc833dafe0ff6b32f27bf9"
+            "package_name": "com.zakatechsoftware.QuizAp",
+            "certificate_hash": "f4c35727f4b4c3f2dca917d0c8699bf036be4e23"
           }
         },
         {
-          "client_id": "672892446980-f809683u73trv39ggopqe5l3gkl2fjn8.apps.googleusercontent.com",
+          "client_id": "505311216624-udph8cdhkeuicsmhpr1i5ao15jkbiefr.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.zakatechsoftware.QuizApp",
-            "certificate_hash": "d922e80469d24695573c73c091db48e8c4a5af25"
+            "package_name": "com.zakatechsoftware.QuizAp",
+            "certificate_hash": "8091f5e4e327f0a7b580d2acd4c2cc5585127c4b"
           }
         },
         {
-          "client_id": "672892446980-puhhf39c5qpn2p5enj43oslj8ghs0q7s.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.zakatechsoftware.QuizApp",
-            "certificate_hash": "bec7dc1076c9bc5b7701e9e64660ddcb2cf29bd1"
-          }
-        },
-        {
-          "client_id": "672892446980-tu3l79sc3d0erdogkjvrirt1etigmpr9.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.zakatechsoftware.QuizApp",
-            "certificate_hash": "4615fe7a13e9b5dfa6925e6093332227ed4ea084"
-          }
-        },
-        {
-          "client_id": "672892446980-830nchecssacmblj94l0ka7o3q843gom.apps.googleusercontent.com",
+          "client_id": "505311216624-sdn5v4crurq7onki1skhp6k32mca76o0.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC0uE11E_j7ueC2wb2dyEfrPl6lf_1-mXo"
+          "current_key": "AIzaSyAAAeD-fBLdcsLyoXCKiAiqQemSI0GDtdg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "672892446980-4lu6df2v8dq9p6mpvtm9hkhu4nk9t8tp.apps.googleusercontent.com",
+              "client_id": "505311216624-sdn5v4crurq7onki1skhp6k32mca76o0.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "672892446980-0ivj65dusfqq43ammb0ajue49hs3k05s.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.zakatechsoftware.QuizApp"
-              }
             }
           ]
         }

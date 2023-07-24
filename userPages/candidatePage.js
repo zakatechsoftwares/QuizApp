@@ -57,35 +57,33 @@ const CandidatePage = ({ navigation }) => {
   };
 
   useEffect(() => {
-    // (async () => {
-    //   //   setTimeout(() => {
-    //   //     setRunUseEffect(!runUseEffect);
-    //   //   }, 2000);
-
-    //   let data = await
     firestore()
       .collection("users")
       .doc(quizGroupName)
       .onSnapshot((data) => {
         if (data) {
           setRefreshing(false);
-          let quizScheduled = data.data()[quizGroupNameRaw].scheduledQuiz;
-          let quizAttempted = data.data()[quizGroupNameRaw].attemptedQuiz;
-          setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
 
-          quizScheduled = quizScheduled.filter(
-            (element) => element.schedule.seconds - Date.now() < 86400
+          let quizScheduled = data.data()[quizGroupNameRaw].scheduledQuiz;
+          let quizAttempteds = data.data()[quizGroupNameRaw].attemptedQuiz;
+
+          let quizAttempted = quizAttempteds.filter(
+            (item) => item.candidateId === dbUser.userId
           );
+
+          // console.log(data.data()[quizGroupNameRaw].scheduledQuiz)
+          for (element of quizAttempted) {
+            quizScheduled.map((item, i) => {
+              if (element.quizId === item.quizId) {
+                quizScheduled.splice(i, 1);
+                //setScheduledQuiz(quizScheduled.sort(ScheduleSortingOrder))
+              }
+            });
+          }
           setAttemptedQuiz(quizAttempted.sort(ScheduleSortingOrder));
           setScheduledQuiz(quizScheduled.sort(ScheduleSortingOrder));
         }
       });
-
-    //  console.log(quizAttempted)
-    //  console.log(quizScheduled)
-    // }
-
-    //  )();
   }, []);
 
   return (

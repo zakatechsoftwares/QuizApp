@@ -55,14 +55,14 @@ const AdminPage = ({ navigation }) => {
       await dynamicLinks()
         .buildLink({
           link: encodeURI(
-            `https://zakatechsoftware.page.link/QuizApp?=${
+            `https://zakatechsoftwarequizap.page.link/QuizAp?=${
               invitedCadre + "?" + quizGroupNameRaw + "~" + passKey
             }`
           ), //`https://myproject-9562e.web.app/?${dbUser.email}`,//`https://quizap.page.link/quizapp/?email=${dbUser.email}`,
           // domainUriPrefix is created in your Firebase console
-          domainUriPrefix: "https://zakatechsoftware.page.link",
+          domainUriPrefix: "https://zakatechsoftwarequizap.page.link",
           android: {
-            packageName: "com.zakatechsoftware.QuizApp",
+            packageName: "com.zakatechsoftware.QuizAp",
           },
           // ios: {
           //   appStoreId: "6449791121",

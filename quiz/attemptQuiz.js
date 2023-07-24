@@ -482,7 +482,7 @@ const AttemptQuiz = ({ navigation, route }) => {
         <View style={{ width: "100%" }}>
           <Text variant="headlineMedium">Time left: {clock} </Text>
         </View>
-        <ScrollView
+        {/* <ScrollView
           ref={(ref) => {
             setRef(ref);
           }}
@@ -500,226 +500,97 @@ const AttemptQuiz = ({ navigation, route }) => {
             }
             // save the current position for the next onScroll event
             scrollYRef.current = currentYPosition;
-          }}
+          }} 
+        > */}
+        <Animated.ScrollView
+          style={{ paddingBottom: 40, marginBottom: 2 }}
+          ref={(ref) => setRef(ref)}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollOffsetY } } }],
+            { useNativeDriver: false }
+          )}
         >
-          {Array.isArray(quiz.quizQuestions) &&
-            //  shuffleArray
-            quiz.quizQuestions.map(
-              (
-                {
-                  questionId,
-                  questionType,
-                  question,
-                  answers,
-                  imageDownloadURL,
-                  answerExplanation,
-                },
-                index
-              ) => {
-                return (
-                  <View
-                    key={questionId}
-                    style={{
-                      borderTopWidth: 1,
-                      borderBottomWidth: 0.5,
-                      padding: 20,
-                    }}
-                    onLayout={(event) => {
-                      const layout = event.nativeEvent.layout;
-                      questionCoordinate[index] = layout.y;
-                      setQuestionCoordinate(questionCoordinate);
-                    }}
-                  >
-                    {imageDownloadURL && (
-                      <Image
-                        style={styles.stretch}
-                        source={{ uri: imageDownloadURL }}
-                      />
-                    )}
-                    <View style={{ flex: 1, flexDirection: "row" }}>
-                      <Text variant="headlineSmall" fontSize="bold">
-                        {(index += 1)}.
-                      </Text>
+          <GestureRecognizer
+            onSwipeDown={(state) => {
+              topOptionBoxValue.value = "auto";
+            }}
+            onSwipeUp={(state) => {
+              topOptionBoxValue.value = 0;
+            }}
+          >
+            {Array.isArray(quiz.quizQuestions) &&
+              //  shuffleArray
+              quiz.quizQuestions.map(
+                (
+                  {
+                    questionId,
+                    questionType,
+                    question,
+                    answers,
+                    imageDownloadURL,
+                    answerExplanation,
+                  },
+                  index
+                ) => {
+                  return (
+                    <View
+                      key={questionId}
+                      style={{
+                        borderTopWidth: 1,
+                        borderBottomWidth: 0.5,
+                        padding: 20,
+                      }}
+                      onLayout={(event) => {
+                        const layout = event.nativeEvent.layout;
+                        questionCoordinate[index] = layout.y;
+                        setQuestionCoordinate(questionCoordinate);
+                      }}
+                    >
+                      {imageDownloadURL && (
+                        <Image
+                          style={styles.stretch}
+                          source={{ uri: imageDownloadURL }}
+                        />
+                      )}
+                      <View style={{ flex: 1, flexDirection: "row" }}>
+                        <Text variant="headlineSmall" fontSize="bold">
+                          {(index += 1)}.
+                        </Text>
 
-                      <Text variant="headlineSmall">{question}</Text>
-                    </View>
+                        <Text variant="headlineSmall">{question}</Text>
+                      </View>
 
-                    <View>
-                      {questionType === "Single Best Answer" && //shuffleArray
-                        answers.map(({ answer, is_correct, answerId }, i) => {
-                          return (
-                            <View key={answerId}>
-                              <RadioButton.Group
-                                onValueChange={(newValue) => {
-                                  if (validateResponse === false) {
-                                    response.some(
-                                      (element) =>
-                                        element.answerId === answerId &&
-                                        element.questionId === questionId
-                                    )
-                                      ? setResponse((response) =>
-                                          response.filter(
-                                            (resp) =>
-                                              resp.questionId !== questionId &&
-                                              resp.answerId !== answerId
-                                          )
-                                        )
-                                      : setResponse((response) => [
-                                          ...response.filter(
-                                            (resp) =>
-                                              resp.questionId !== questionId
-                                          ),
-                                          newValue,
-                                        ]);
-                                  }
-                                }}
-                                value={response}
-                              >
-                                <View
-                                  style={{
-                                    flexDirection: "row",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    margin: 5,
-                                  }}
-                                >
-                                  {validateResponse &&
-                                    response.some(
-                                      (element) =>
-                                        element.answerId === answerId &&
-                                        element.is_correct === "True"
-                                    ) && (
-                                      <Ionicons
-                                        name="checkmark"
-                                        size={24}
-                                        color="green"
-                                      />
-                                    )}
-                                  {validateResponse &&
-                                    is_correct === "True" &&
-                                    !response.some(
-                                      (element) => element.answerId === answerId
-                                    ) && (
-                                      <Entypo
-                                        name="cross"
-                                        size={24}
-                                        color="red"
-                                      />
-                                    )}
-                                  <View
-                                    style={[
-                                      styles.RadioButton,
-                                      {
-                                        backgroundColor: validateResponse
-                                          ? response.some(
-                                              (element) =>
-                                                element.answerId === answerId &&
-                                                element.is_correct !== "True"
-                                            ) && "green"
-                                          : response.some(
-                                              (element) =>
-                                                element.answerId === answerId
-                                            )
-                                          ? "black"
-                                          : "white",
-                                        width: 25,
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                      },
-                                    ]}
-                                  >
-                                    <RadioButton
-                                      value={{
-                                        questionType: questionType,
-                                        questionId: questionId,
-                                        question: question,
-                                        answerId: answerId,
-                                        answer: answer,
-                                        is_correct: is_correct,
-                                      }}
-
-                                      //    onChange = {()=> setResponse(response=>[...response.filter((resp)=>(resp.questionId !== questionId)),
-                                      //     {questionType: questionType, questionId: questionId, index: index, question : question, answer : answer, is_correct : is_correct}])}
-                                    />
-                                  </View>
-                                  <View
-                                    style={{
-                                      width: "95%",
-                                      justifyContent: "center",
-                                    }}
-                                  >
-                                    <Text variant="headlineSmall">
-                                      {answer}
-                                    </Text>
-                                  </View>
-                                </View>
-                              </RadioButton.Group>
-                            </View>
-                          );
-                        })}
-                    </View>
-                    <View>
-                      {questionType === "Multiple Choice" &&
-                        //shuffleArray
-                        answers.map(
-                          ({ answerId, answer, is_correct, choice }, i) => {
+                      <View>
+                        {questionType === "Single Best Answer" && //shuffleArray
+                          answers.map(({ answer, is_correct, answerId }, i) => {
                             return (
                               <View key={answerId}>
                                 <RadioButton.Group
-                                  onValueChange={
-                                    (newValue) => {
-                                      if (validateResponse === false) {
-                                        if (
-                                          response.some(
-                                            (element) =>
-                                              element.answerId ===
-                                                newValue.answerId &&
-                                              element.questionId ===
-                                                newValue.questionId &&
-                                              element.choice === newValue.choice
+                                  onValueChange={(newValue) => {
+                                    if (validateResponse === false) {
+                                      response.some(
+                                        (element) =>
+                                          element.answerId === answerId &&
+                                          element.questionId === questionId
+                                      )
+                                        ? setResponse((response) =>
+                                            response.filter(
+                                              (resp) =>
+                                                resp.questionId !==
+                                                  questionId &&
+                                                resp.answerId !== answerId
+                                            )
                                           )
-                                        ) {
-                                          const rem = response.filter(
-                                            (item) =>
-                                              item.questionId !==
-                                                newValue.questionId ||
-                                              (item.questionId ===
-                                                newValue.questionId &&
-                                                item.answerId !==
-                                                  newValue.answerId)
-                                          );
-                                          // const rem = response.splice(response.findIndex(element=>element.answerId===newValue.answerId),1)
-                                          //console.log(response)
-                                          // console.log('true')
-                                          setResponse(rem);
-                                        } else if (
-                                          response.some(
-                                            (element) =>
-                                              element.answerId ===
-                                                newValue.answerId &&
-                                              element.questionId ===
-                                                newValue.questionId &&
-                                              element.choice !== newValue.choice
-                                          )
-                                        ) {
-                                          response.splice(
-                                            response.findIndex(
-                                              (element) =>
-                                                element.answerId ===
-                                                newValue.answerId
+                                        : setResponse((response) => [
+                                            ...response.filter(
+                                              (resp) =>
+                                                resp.questionId !== questionId
                                             ),
-                                            1
-                                          );
-                                          setResponse([...response, newValue]);
-                                        } else {
-                                          //console.log('false')
-                                          // console.log([...response, newValue])
-                                          setResponse([...response, newValue]);
-                                        }
-                                      }
+                                            newValue,
+                                          ]);
                                     }
-                                    //setResponse(response=>[...response.filter((resp)=>(resp.questionId !== questionId || resp.answerId!==answerId)),newValue])
-                                  }
+                                  }}
                                   value={response}
                                 >
                                   <View
@@ -730,189 +601,73 @@ const AttemptQuiz = ({ navigation, route }) => {
                                       margin: 5,
                                     }}
                                   >
-                                    <View
-                                      style={{
-                                        width: "15%",
-                                        flexDirection: "row",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                      }}
-                                    >
-                                      {validateResponse &&
+                                    {validateResponse &&
                                       response.some(
                                         (element) =>
                                           element.answerId === answerId &&
-                                          element.is_correct === "True" &&
-                                          element.choice === true
-                                      ) ? (
+                                          element.is_correct === "True"
+                                      ) && (
                                         <Ionicons
                                           name="checkmark"
                                           size={24}
                                           color="green"
                                         />
-                                      ) : validateResponse &&
-                                        response.some(
-                                          (element) =>
-                                            element.answerId === answerId &&
-                                            element.questionId === questionId &&
-                                            element.choice === true &&
-                                            element.is_correct != "True"
-                                        ) ? (
+                                      )}
+                                    {validateResponse &&
+                                      is_correct === "True" &&
+                                      !response.some(
+                                        (element) =>
+                                          element.answerId === answerId
+                                      ) && (
                                         <Entypo
                                           name="cross"
                                           size={24}
                                           color="red"
                                         />
-                                      ) : (
-                                        validateResponse &&
-                                        //(choice===true &&
-                                        // response.some(element=>element.answerId!=answerId)
-
-                                        is_correct === "True" && ( //choice===true &&
-                                          // !response.some(element=>element.answerId===answerId) &&
-                                          <Entypo
-                                            name="cross"
-                                            size={24}
-                                            color="red"
-                                          />
-                                        )
                                       )}
+                                    <View
+                                      style={[
+                                        styles.RadioButton,
+                                        {
+                                          backgroundColor: validateResponse
+                                            ? response.some(
+                                                (element) =>
+                                                  element.answerId ===
+                                                    answerId &&
+                                                  element.is_correct !== "True"
+                                              ) && "green"
+                                            : response.some(
+                                                (element) =>
+                                                  element.answerId === answerId
+                                              )
+                                            ? "black"
+                                            : "white",
+                                          width: 25,
+                                          justifyContent: "center",
+                                          alignItems: "center",
+                                        },
+                                      ]}
+                                    >
+                                      <RadioButton
+                                        value={{
+                                          questionType: questionType,
+                                          questionId: questionId,
+                                          question: question,
+                                          answerId: answerId,
+                                          answer: answer,
+                                          is_correct: is_correct,
+                                        }}
 
-                                      {/* //) 
-                  //  && // || is_correct==='False' || '' && choice !==false )
-                     (is_correct==='False' || '' && choice ===false) || (is_correct==='True' && choice ===true)                     
-                      &&
-                <Entypo name="cross" size={24} color="red" /> 
-   */}
-
-                                      <View
-                                        style={[
-                                          styles.RadioButton,
-                                          {
-                                            backgroundColor: validateResponse
-                                              ? is_correct === "True" &&
-                                                choice === true
-                                                ? "red"
-                                                : "white"
-                                              : response.some(
-                                                  (element) =>
-                                                    element.answerId ===
-                                                      answerId && element.choice
-                                                )
-                                              ? "black"
-                                              : "white",
-                                            width: 25,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                          },
-                                        ]}
-                                      >
-                                        <RadioButton
-                                          value={{
-                                            questionType: questionType,
-                                            questionId: questionId,
-                                            question: question,
-                                            answerId: answerId,
-                                            answer: answer,
-                                            is_correct: is_correct,
-                                            choice: true,
-                                          }}
-                                        />
-                                      </View>
-
-                                      <Text variant="headlineSmall">T</Text>
+                                        //    onChange = {()=> setResponse(response=>[...response.filter((resp)=>(resp.questionId !== questionId)),
+                                        //     {questionType: questionType, questionId: questionId, index: index, question : question, answer : answer, is_correct : is_correct}])}
+                                      />
                                     </View>
                                     <View
                                       style={{
-                                        width: "15%",
-                                        flexDirection: "row",
+                                        width: "95%",
                                         justifyContent: "center",
-                                        alignItems: "center",
                                       }}
                                     >
-                                      {validateResponse &&
-                                      response.some(
-                                        (element) =>
-                                          element.answerId === answerId &&
-                                          element.choice === false &&
-                                          (element.is_correct === "False" ||
-                                            element.is_correct === "")
-                                      ) ? (
-                                        <Ionicons
-                                          name="checkmark"
-                                          size={24}
-                                          color="green"
-                                        />
-                                      ) : validateResponse &&
-                                        response.some(
-                                          (element) =>
-                                            element.answerId === answerId &&
-                                            element.questionId === questionId &&
-                                            element.choice === false &&
-                                            element.is_correct === "True"
-                                        ) ? (
-                                        <Entypo
-                                          name="cross"
-                                          size={24}
-                                          color="red"
-                                        />
-                                      ) : (
-                                        validateResponse && //&&
-                                        // (choice===false &&
-                                        //  response.some(element=>element.answerId!=answerId)
-
-                                        //)
-
-                                        is_correct === "True" && ( //choice===false &&
-                                          //  !response.some(element=>element.answerId===answerId) &&
-                                          <Entypo
-                                            name="cross"
-                                            size={24}
-                                            color="red"
-                                          />
-                                        )
-                                      )}
-
-                                      <View
-                                        style={[
-                                          styles.RadioButton,
-                                          {
-                                            backgroundColor: validateResponse
-                                              ? is_correct != "True" &&
-                                                choice === false
-                                                ? "red"
-                                                : "white"
-                                              : response.some(
-                                                  (element) =>
-                                                    element.answerId ===
-                                                      answerId &&
-                                                    !element.choice
-                                                )
-                                              ? "black"
-                                              : "white",
-                                            width: 25,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                          },
-                                        ]}
-                                      >
-                                        <RadioButton
-                                          value={{
-                                            questionType: questionType,
-                                            questionId: questionId,
-                                            question: question,
-                                            answerId: answerId,
-                                            answer: answer,
-                                            is_correct: is_correct,
-                                            choice: false,
-                                          }}
-                                        />
-                                      </View>
-
-                                      <Text variant="headlineSmall">F</Text>
-                                    </View>
-
-                                    <View style={{ width: "70%" }}>
                                       <Text variant="headlineSmall">
                                         {answer}
                                       </Text>
@@ -921,21 +676,298 @@ const AttemptQuiz = ({ navigation, route }) => {
                                 </RadioButton.Group>
                               </View>
                             );
-                          }
-                        )}
-                    </View>
-                    {validateResponse && (
-                      <View>
-                        <Text style={{ color: "green" }}>
-                          Answer Explantion: {answerExplanation}
-                        </Text>
+                          })}
                       </View>
-                    )}
-                  </View>
-                );
-              }
-            )}
-        </ScrollView>
+                      <View>
+                        {questionType === "Multiple Choice" &&
+                          //shuffleArray
+                          answers.map(
+                            ({ answerId, answer, is_correct, choice }, i) => {
+                              return (
+                                <View key={answerId}>
+                                  <RadioButton.Group
+                                    onValueChange={
+                                      (newValue) => {
+                                        if (validateResponse === false) {
+                                          if (
+                                            response.some(
+                                              (element) =>
+                                                element.answerId ===
+                                                  newValue.answerId &&
+                                                element.questionId ===
+                                                  newValue.questionId &&
+                                                element.choice ===
+                                                  newValue.choice
+                                            )
+                                          ) {
+                                            const rem = response.filter(
+                                              (item) =>
+                                                item.questionId !==
+                                                  newValue.questionId ||
+                                                (item.questionId ===
+                                                  newValue.questionId &&
+                                                  item.answerId !==
+                                                    newValue.answerId)
+                                            );
+                                            // const rem = response.splice(response.findIndex(element=>element.answerId===newValue.answerId),1)
+                                            //console.log(response)
+                                            // console.log('true')
+                                            setResponse(rem);
+                                          } else if (
+                                            response.some(
+                                              (element) =>
+                                                element.answerId ===
+                                                  newValue.answerId &&
+                                                element.questionId ===
+                                                  newValue.questionId &&
+                                                element.choice !==
+                                                  newValue.choice
+                                            )
+                                          ) {
+                                            response.splice(
+                                              response.findIndex(
+                                                (element) =>
+                                                  element.answerId ===
+                                                  newValue.answerId
+                                              ),
+                                              1
+                                            );
+                                            setResponse([
+                                              ...response,
+                                              newValue,
+                                            ]);
+                                          } else {
+                                            //console.log('false')
+                                            // console.log([...response, newValue])
+                                            setResponse([
+                                              ...response,
+                                              newValue,
+                                            ]);
+                                          }
+                                        }
+                                      }
+                                      //setResponse(response=>[...response.filter((resp)=>(resp.questionId !== questionId || resp.answerId!==answerId)),newValue])
+                                    }
+                                    value={response}
+                                  >
+                                    <View
+                                      style={{
+                                        flexDirection: "row",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        margin: 5,
+                                      }}
+                                    >
+                                      <View
+                                        style={{
+                                          width: "15%",
+                                          flexDirection: "row",
+                                          justifyContent: "center",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        {validateResponse &&
+                                        response.some(
+                                          (element) =>
+                                            element.answerId === answerId &&
+                                            element.is_correct === "True" &&
+                                            element.choice === true
+                                        ) ? (
+                                          <Ionicons
+                                            name="checkmark"
+                                            size={24}
+                                            color="green"
+                                          />
+                                        ) : validateResponse &&
+                                          response.some(
+                                            (element) =>
+                                              element.answerId === answerId &&
+                                              element.questionId ===
+                                                questionId &&
+                                              element.choice === true &&
+                                              element.is_correct != "True"
+                                          ) ? (
+                                          <Entypo
+                                            name="cross"
+                                            size={24}
+                                            color="red"
+                                          />
+                                        ) : (
+                                          validateResponse &&
+                                          //(choice===true &&
+                                          // response.some(element=>element.answerId!=answerId)
+
+                                          is_correct === "True" && ( //choice===true &&
+                                            // !response.some(element=>element.answerId===answerId) &&
+                                            <Entypo
+                                              name="cross"
+                                              size={24}
+                                              color="red"
+                                            />
+                                          )
+                                        )}
+
+                                        {/* //) 
+                  //  && // || is_correct==='False' || '' && choice !==false )
+                     (is_correct==='False' || '' && choice ===false) || (is_correct==='True' && choice ===true)                     
+                      &&
+                <Entypo name="cross" size={24} color="red" /> 
+   */}
+
+                                        <View
+                                          style={[
+                                            styles.RadioButton,
+                                            {
+                                              backgroundColor: validateResponse
+                                                ? is_correct === "True" &&
+                                                  choice === true
+                                                  ? "red"
+                                                  : "white"
+                                                : response.some(
+                                                    (element) =>
+                                                      element.answerId ===
+                                                        answerId &&
+                                                      element.choice
+                                                  )
+                                                ? "black"
+                                                : "white",
+                                              width: 25,
+                                              justifyContent: "center",
+                                              alignItems: "center",
+                                            },
+                                          ]}
+                                        >
+                                          <RadioButton
+                                            value={{
+                                              questionType: questionType,
+                                              questionId: questionId,
+                                              question: question,
+                                              answerId: answerId,
+                                              answer: answer,
+                                              is_correct: is_correct,
+                                              choice: true,
+                                            }}
+                                          />
+                                        </View>
+
+                                        <Text variant="headlineSmall">T</Text>
+                                      </View>
+                                      <View
+                                        style={{
+                                          width: "15%",
+                                          flexDirection: "row",
+                                          justifyContent: "center",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        {validateResponse &&
+                                        response.some(
+                                          (element) =>
+                                            element.answerId === answerId &&
+                                            element.choice === false &&
+                                            (element.is_correct === "False" ||
+                                              element.is_correct === "")
+                                        ) ? (
+                                          <Ionicons
+                                            name="checkmark"
+                                            size={24}
+                                            color="green"
+                                          />
+                                        ) : validateResponse &&
+                                          response.some(
+                                            (element) =>
+                                              element.answerId === answerId &&
+                                              element.questionId ===
+                                                questionId &&
+                                              element.choice === false &&
+                                              element.is_correct === "True"
+                                          ) ? (
+                                          <Entypo
+                                            name="cross"
+                                            size={24}
+                                            color="red"
+                                          />
+                                        ) : (
+                                          validateResponse && //&&
+                                          // (choice===false &&
+                                          //  response.some(element=>element.answerId!=answerId)
+
+                                          //)
+
+                                          is_correct === "True" && ( //choice===false &&
+                                            //  !response.some(element=>element.answerId===answerId) &&
+                                            <Entypo
+                                              name="cross"
+                                              size={24}
+                                              color="red"
+                                            />
+                                          )
+                                        )}
+
+                                        <View
+                                          style={[
+                                            styles.RadioButton,
+                                            {
+                                              backgroundColor: validateResponse
+                                                ? is_correct != "True" &&
+                                                  choice === false
+                                                  ? "red"
+                                                  : "white"
+                                                : response.some(
+                                                    (element) =>
+                                                      element.answerId ===
+                                                        answerId &&
+                                                      !element.choice
+                                                  )
+                                                ? "black"
+                                                : "white",
+                                              width: 25,
+                                              justifyContent: "center",
+                                              alignItems: "center",
+                                            },
+                                          ]}
+                                        >
+                                          <RadioButton
+                                            value={{
+                                              questionType: questionType,
+                                              questionId: questionId,
+                                              question: question,
+                                              answerId: answerId,
+                                              answer: answer,
+                                              is_correct: is_correct,
+                                              choice: false,
+                                            }}
+                                          />
+                                        </View>
+
+                                        <Text variant="headlineSmall">F</Text>
+                                      </View>
+
+                                      <View style={{ width: "70%" }}>
+                                        <Text variant="headlineSmall">
+                                          {answer}
+                                        </Text>
+                                      </View>
+                                    </View>
+                                  </RadioButton.Group>
+                                </View>
+                              );
+                            }
+                          )}
+                      </View>
+                      {validateResponse && (
+                        <View>
+                          <Text style={{ color: "green" }}>
+                            Answer Explantion: {answerExplanation}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  );
+                }
+              )}
+          </GestureRecognizer>
+        </Animated.ScrollView>
       </View>
     </SafeAreaView>
   );

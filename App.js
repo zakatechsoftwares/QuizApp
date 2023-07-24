@@ -58,10 +58,10 @@ import messaging from "@react-native-firebase/messaging";
 
 const adUnitIdBanner = __DEV__
   ? TestIds.BANNER
-  : "ca-app-pub-1200533271102374/6694029841";
+  : "ca-app-pub-1200533271102374/8278412555";
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
-  : "ca-app-pub-1200533271102374/7558403424";
+  : "ca-app-pub-1200533271102374/3189737409";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
   requestNonPersonalizedAdsOnly: true,
@@ -255,10 +255,10 @@ function App() {
           passFiltered?.length > 0 &&
           passKey // && groupMemberships.length<1
         ) {
-          // pass.splice(
-          //   pass.findIndex((item) => item.passKey === key),
-          //   1
-          // );
+          pass.splice(
+            pass.findIndex((item) => item.passKey === key),
+            1
+          );
 
           firestore()
             .collection("users")
@@ -389,10 +389,9 @@ function App() {
         dispatch(setLoading(false));
       });
   };
-  console.log(auth().currentUser);
+
   // auth().currentUser.signOut();
   useEffect(() => {
-    LogOut();
     // auth().currentUser.signOut();
     if (isMounted.current === true) {
       dynamicLinks().onLink(
@@ -612,30 +611,26 @@ function App() {
                 ...props.state,
                 routeNames: props.state.routeNames.filter(
                   // To hide single option
-                  //  (routeName) => routeName !== 'QuestionStack',
+                  // (routeName) => routeName !== 'HiddenPage1',
                   // To hide multiple options you can add & condition
                   (routeName) => {
-                    routeName === "ProfileStack";
-                    // &&
-                    //  routeName === 'QuizStack'
-                    //  && routeName === 'QuestionStack'
+                    // routeName !== "ProfileStack" &&
+                    routeName !== "CreateFlashcards";
                   }
                 ),
-                routes: props.state.routes.filter((route) => {
-                  route.name === "ProfileStack";
-                  //&&
-                  //  route.name === 'QuizStack'
-                  //  && route.name === 'QuestionStack'
-                }),
-                // ),
+                routes: props.state.routes.filter(
+                  (route) =>
+                    //  route.name !== "ProfileStack" &&
+                    route.name !== "CreateFlashcards"
+                ),
               },
             };
 
             return (
-              <DrawerContentScrollView {...props}>
-                <DrawerItemList
-                  {...props} //state={newState} {...rest}
-                />
+              <DrawerContentScrollView {...filteredProps}>
+                {/* <DrawerItemList
+                  {...filteredProps} //state={newState} {...rest}
+                /> */}
 
                 {/* <DrawerItem
                   label="Home"

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "QuizApp",
-    "slug": "QuizApp",
+    "name": "QuizAp",
+    "slug": "QuizAp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -38,19 +38,19 @@
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",
-      "package": "com.zakatechsoftware.QuizApp",
-      "versionCode": 12
+      "package": "com.zakatechsoftware.QuizAp",
+      "versionCode": 13
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "ed16f0bb-ab3f-4aed-b1d7-d4754ef161ad"
+        "projectId": "f8a93b2b-99b3-4767-9603-ea5e93580027"
       }
     }
   },
   "react-native-google-mobile-ads": {
-    "android_app_id": "ca-app-pub-1200533271102374~3975533015"
+    "android_app_id": "ca-app-pub-1200533271102374~5300895420"
   }
 }
