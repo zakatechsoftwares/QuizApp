@@ -64,10 +64,10 @@ const AdminPage = ({ navigation }) => {
           android: {
             packageName: "com.zakatechsoftware.QuizAp",
           },
-          // ios: {
-          //   appStoreId: "6449791121",
-          //   bundleId: "com.ssaka46.MobileQuizApp",
-          // },
+          ios: {
+            appStoreId: "6453023834",
+            bundleId: "com.zakatechsoftware.QuizAp",
+          },
         })
 
         .then((arg) => {

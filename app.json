@@ -30,7 +30,9 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.zakatechsoftware.QuizAp",
+      "buildNumber": "8"
     },
     "android": {
       "adaptiveIcon": {
@@ -39,7 +41,7 @@
       },
       "googleServicesFile": "./google-services.json",
       "package": "com.zakatechsoftware.QuizAp",
-      "versionCode": 13
+      "versionCode": 16
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -48,9 +50,16 @@
       "eas": {
         "projectId": "f8a93b2b-99b3-4767-9603-ea5e93580027"
       }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f8a93b2b-99b3-4767-9603-ea5e93580027"
     }
   },
   "react-native-google-mobile-ads": {
-    "android_app_id": "ca-app-pub-1200533271102374~5300895420"
+    "android_app_id": "ca-app-pub-1200533271102374~5300895420",
+    "ios_app_id": "ca-app-pub-1200533271102374~6719872583"
   }
 }

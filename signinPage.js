@@ -194,7 +194,7 @@ const SigninPage = ({ navigation }) => {
       {initializing && <ActivityIndicator />}
       {show || initializing || (
         <View style={{ justifyContent: "space-between" }}>
-          <Text style={{ textAlign: "center" }}>SIGN IN</Text>
+          <Text style={{ textAlign: "center" }}> WELCOME SIGN IN</Text>
           <TextInput
             name="email"
             value={email}

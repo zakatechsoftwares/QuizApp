@@ -422,16 +422,6 @@ const AttemptQuiz = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <DynamicHeader animHeaderValue={scrollOffsetY} onSubmit={onSubmit} 
-                    handleScroll={handleScroll}
-                    attemptedQuestions={totalAttempted} 
-                    totalQuestions={totalQuestions}
-                    clock={clock}
-                    negFacMc={quiz.negFacMc}
-                    quizName={quiz.quizName}
-                    
-                    /> */}
-
       <View style={{ paddingBottom: 40, marginBottom: 2 }}>
         <Animated.View
           style={[
@@ -505,15 +495,15 @@ const AttemptQuiz = ({ navigation, route }) => {
         <Animated.ScrollView
           style={{ paddingBottom: 40, marginBottom: 2 }}
           ref={(ref) => setRef(ref)}
-          scrollEventThrottle={16}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollOffsetY } } }],
-            { useNativeDriver: false }
-          )}
+          // scrollEventThrottle={16}
+          // onScroll={Animated.event(
+          //   [{ nativeEvent: { contentOffset: { y: scrollOffsetY } } }],
+          //   { useNativeDriver: false }
+          // )}
         >
           <GestureRecognizer
             onSwipeDown={(state) => {
-              topOptionBoxValue.value = "auto";
+              topOptionBoxValue.value = 130;
             }}
             onSwipeUp={(state) => {
               topOptionBoxValue.value = 0;

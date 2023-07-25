@@ -9,7 +9,9 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Platform,
 } from "react-native";
+
 import SigninPage from "./signinPage";
 import { useDispatch, Provider, useSelector } from "react-redux";
 import { Button } from "react-native";
@@ -58,9 +60,14 @@ import messaging from "@react-native-firebase/messaging";
 
 const adUnitIdBanner = __DEV__
   ? TestIds.BANNER
+  : Platform.OS === "ios"
+  ? "ca-app-pub-1200533271102374/2397484198"
   : "ca-app-pub-1200533271102374/8278412555";
+
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
+  : Platform.OS === "ios"
+  ? "ca-app-pub-1200533271102374/2014340817"
   : "ca-app-pub-1200533271102374/3189737409";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
@@ -599,12 +606,6 @@ function App() {
             swipeEnabled: false,
           }}
           drawerContent={(props) => {
-            // const { state, ...rest } = props;
-            // const newState = { ...state };
-            // newState.routes = newState.routes.filter(
-            //   (item) => item.name !== "FlashCardStack"
-            // );
-
             const filteredProps = {
               ...props,
               state: {
