@@ -13,9 +13,9 @@ const FlashCardStack = () => {
     <Stack.Navigator initialRouteName="Question Bank">
       {/* <Stack.Screen name='Profile' component={Profile} /> */}
       <Stack.Screen name="CreateFlashcards" component={AddCardPage} />
-      {/* <Stack.Screen name='FlashcardGroups' component={CardGroupsPage} />
-        <Stack.Screen name='Flashcards' component={FlipCard} />
-        <Stack.Screen name='EditFlashcards' component={EditFlashcards} /> */}
+      <Stack.Screen name="FlashcardGroups" component={CardGroupsPage} />
+      <Stack.Screen name="Flashcards" component={FlipCard} />
+      <Stack.Screen name="EditFlashcards" component={EditFlashcards} />
     </Stack.Navigator>
   );
 };
