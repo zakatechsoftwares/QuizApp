@@ -783,7 +783,7 @@ function App() {
             name="FlashCardStack"
             component={FlashCardStack}
             options={{
-              title: `Group: ${currentGroupName || "None"}`,
+              title: `Group: ${groupName || "None"}`,
               headerShown: true,
               drawerLabel: "Flashcards",
             }}
@@ -795,7 +795,7 @@ function App() {
               name="QuestionStack"
               component={StackQuestionPage}
               options={{
-                title: `Group: ${currentGroupName || "None"}`,
+                title: `Group: ${groupName || "None"}`,
                 headerShown: true,
               }}
             />
@@ -808,7 +808,7 @@ function App() {
               name="QuizStack"
               component={StackQuizPage}
               options={{
-                title: `Group: ${currentGroupName || "None"}`,
+                title: `Group: ${groupName || "None"}`,
                 headerShown: true,
               }}
             />

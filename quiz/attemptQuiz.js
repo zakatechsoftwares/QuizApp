@@ -155,7 +155,7 @@ const AttemptQuiz = ({ navigation, route }) => {
 
     const attemptedQuiz = {
       dateCreated: new Date(),
-      quizId: Math.random().toString(36).substring(2, 12),
+      //quizId: Math.random().toString(36).substring(2, 12),
       attemptedQuizId: Math.random().toString(36).substring(2, 12),
       quizName: quizName,
       quizId: quizId,
@@ -174,19 +174,45 @@ const AttemptQuiz = ({ navigation, route }) => {
       remainingTime: timer,
     };
 
+    const notAttemptedQuiz = {
+      dateCreated: new Date(),
+      //quizId: Math.random().toString(36).substring(2, 12),
+      //attemptedQuizId: Math.random().toString(36).substring(2, 12),
+      quizName: quizName,
+      quizId: quizId,
+      candidate: dbUser.email,
+      candidateId: dbUser.userId,
+      // response: response,
+      attemptedSBA: 0,
+      correctSBA: 0,
+      totalSBA: 0,
+      negFacSBA: 0,
+      attemptedMCQ: 0,
+      correctMCQ: 0,
+      totalMCQ: 0,
+      negFacMCQ: 0,
+      score: 0 + "%",
+    };
+
     setValidateResponse(true);
 
-    await firestore()
-      .collection("users")
-      .doc(quizGroupName)
+    const docRef = firestore().collection("users").doc(quizGroupName);
+
+    docRef
       .update({
         [`${quizGroupNameRaw}.attemptedQuiz`]:
-          firestore.FieldValue.arrayUnion(attemptedQuiz),
-      });
+          firestore.FieldValue.arrayRemove(notAttemptedQuiz),
+      })
+      .then(
+        docRef.update({
+          [`${quizGroupNameRaw}.attemptedQuiz`]:
+            firestore.FieldValue.arrayUnion(attemptedQuiz),
+        })
+      )
+      .then(navigation.navigate("ProfileStack", { screen: "Profile" }))
+      .catch((e) => Alert.alert(e.message));
 
     // Updates.reloadAsync()
-
-    navigation.navigate("ProfileStack", { screen: "Profile" });
   };
 
   const onSubmit = () => {

@@ -31,6 +31,66 @@ const CandidatePage = ({ navigation }) => {
     quizGroupNameRaw.indexOf("-") + 1
   );
 
+  const submit = async (item) => {
+    await firestore()
+      .collection("users")
+      .doc(quizGroupName)
+      .update({
+        [`${quizGroupNameRaw}.attemptedQuiz`]: firestore.FieldValue.arrayUnion({
+          dateCreated: new Date(),
+          //quizId: Math.random().toString(36).substring(2, 12),
+          //attemptedQuizId: Math.random().toString(36).substring(2, 12),
+          quizName: item.quizName,
+          quizId: item.quizId,
+          candidate: dbUser.email,
+          candidateId: dbUser.userId,
+          // response: response,
+          attemptedSBA: 0,
+          correctSBA: 0,
+          totalSBA: 0,
+          negFacSBA: 0,
+          attemptedMCQ: 0,
+          correctMCQ: 0,
+          totalMCQ: 0,
+          negFacMCQ: 0,
+          score: 0 + "%",
+        }),
+      })
+      .then(
+        navigation.navigate("ProfileStack", {
+          screen: paymentStatus ? "Attempt Quiz" : "Payment",
+          params: {
+            quizId: item.quizId,
+            quizName: item.quizName,
+          },
+        })
+      );
+  };
+
+  const onSubmit = (item) => {
+    const validButtons = [
+      { text: "Don't Start", style: "cancel", onPress: () => {} },
+      {
+        text: "Start",
+        style: "destructive",
+        // If the user confirmed, then we dispatch the action we blocked earlier
+        // This will continue the action that had triggered the removal of the screen
+        onPress: () => {
+          submit(item);
+        },
+      },
+    ];
+
+    Alert.alert(
+      "You are about to start a quiz",
+      "Please do not exit quiz without submitting to avoid been scored zero!",
+      validButtons.map((buttonText) => ({
+        text: buttonText.text,
+        onPress: buttonText.onPress,
+      }))
+    );
+  };
+
   const FlatListItemSeparator = () => {
     return (
       //Item Separator
@@ -132,12 +192,12 @@ const CandidatePage = ({ navigation }) => {
           return (
             <View>
               <Text variant="titleLarge">Quiz Title: {item.quizName}</Text>
-              {item.score && (
+              {item.score !== undefined && (
                 <Text variant="titleLarge">
                   Your Score: {parseFloat(item.score).toFixed(2)}%
                 </Text>
               )}
-              {item.score && (
+              {item.score !== undefined && (
                 <Text variant="titleLarge">
                   Your Score is in : {percentile.toFixed(2)} percentile
                 </Text>
@@ -155,9 +215,7 @@ const CandidatePage = ({ navigation }) => {
                   justifyContent: "space-between",
                 }}
               >
-                <View></View>
-
-                {item.score && (
+                {item.score !== undefined && (
                   <View
                     style={{
                       backgroundColor: "green",
@@ -170,15 +228,23 @@ const CandidatePage = ({ navigation }) => {
                     }}
                   >
                     <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate("ProfileStack", {
-                          screen: paymentStatus ? "Review Attempts" : "Payment",
-                          params: {
-                            quizId: item.quizId,
-                            attemptedQuizId: item.attemptedQuizId,
-                          },
-                        })
-                      }
+                      onPress={() => {
+                        if (item.attemptedQuizId) {
+                          navigation.navigate("ProfileStack", {
+                            screen: paymentStatus
+                              ? "Review Attempts"
+                              : "Payment",
+                            params: {
+                              quizId: item.quizId,
+                              attemptedQuizId: item.attemptedQuizId,
+                            },
+                          });
+                        } else {
+                          Alert.alert(
+                            "You scored zero because you exited the quiz "
+                          );
+                        }
+                      }}
                     >
                       <Text style={{ fontWeight: "bold", textAlign: "center" }}>
                         Review Answers
@@ -202,15 +268,7 @@ const CandidatePage = ({ navigation }) => {
                   >
                     <TouchableOpacity
                       disabled={new Date() >= millisec ? false : true}
-                      onPress={() =>
-                        navigation.navigate("ProfileStack", {
-                          screen: paymentStatus ? "Attempt Quiz" : "Payment",
-                          params: {
-                            quizId: item.quizId,
-                            quizName: item.quizName,
-                          },
-                        })
-                      }
+                      onPress={() => onSubmit(item)}
                     >
                       <Text style={{ fontWeight: "bold", textAlign: "center" }}>
                         {new Date() >= millisec
@@ -225,7 +283,11 @@ const CandidatePage = ({ navigation }) => {
           );
         }}
         keyExtractor={(item, index) =>
-          item.scheduledQuizId ? item.scheduledQuizId : item.attemptedQuizId
+          item.scheduledQuizId
+            ? item.scheduledQuizId
+            : item.attemptedQuizId
+            ? item.attemptedQuizId
+            : item.quizId
         }
       />
     </View>
