@@ -583,7 +583,11 @@ function App() {
             {dbUserFirstName && (
               <View style={{ width: "100%", textAlign: "center" }}>
                 <Button
-                  title="Change the Current Quiz Group"
+                  title={
+                    groupName
+                      ? "Change the Current Quiz Group"
+                      : "Enter a quiz group"
+                  }
                   onPress={() => {
                     dispatch(setCurrentGroupCadre(null));
                     dispatch(setCurrentGroupName(null));

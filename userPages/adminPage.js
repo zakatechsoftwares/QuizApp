@@ -350,7 +350,11 @@ Do NOT share the key as it can be used only once:${arg}`,
             );
           }}
           keyExtractor={(item, index) =>
-            item.scheduledQuizId ? item.scheduledQuizId : item.attemptedQuizId
+            item.scheduledQuizId
+              ? item.scheduledQuizId
+              : item.attemptedQuizId
+              ? item.attemptedQuizId
+              : item.quizId
           }
         />
       </GestureRecognizer>

@@ -1,38 +1,38 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, {
   useSharedValue,
   withTiming,
   Easing,
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const FlipCard = ({ front, back, isFlipped, flipCard, rotateY }) => {
   return (
     <TouchableOpacity onPress={flipCard}>
       <View style={{ alignItems: "center" }}>
-        <View
-        // style={[
-        //   {
-        //     transform: [{ rotateY: `${rotateY.value}deg` }],
-        //     backgroundColor: isFlipped ? "orange" : "green",
-        //     width: "100%",
-        //     height: "100%",
-        //   },
-        // ]}
+        <Animated.View
+          style={[
+            {
+              transform: [{ rotateY: `${rotateY.value}deg` }],
+              backgroundColor: isFlipped ? "green" : "orange",
+              width: "100%",
+              height: "100%",
+            },
+          ]}
         >
-          <Text
+          <Animated.Text
             style={{
               fontSize: 18,
-              //  transform: [{ rotateY: `${rotateY.value}deg` }],
+              transform: [{ rotateY: `${rotateY.value}deg` }],
               textAlign: "center",
               textAlignVertical: "center",
             }}
           >
             {isFlipped ? back : front}
-          </Text>
-        </View>
+          </Animated.Text>
+        </Animated.View>
       </View>
     </TouchableOpacity>
   );
@@ -100,9 +100,6 @@ const CardViewer = ({ navigation, route }) => {
   const moveToNextCard = () => {
     setCurrentIndex(currentIndex + 1);
     setIsFlipped(false);
-    if (currentIndex === cards.length) {
-      Alert.alert("The last card viewed");
-    }
   };
 
   if (cards.length === 0) {
@@ -114,6 +111,8 @@ const CardViewer = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={{ height: "80%", width: "100%" }}>
+        <Text>{isFlipped ? "Answer" : "Question"}</Text>
+
         <FlipCard
           front={currentCard.front}
           back={currentCard.back}
@@ -136,19 +135,20 @@ const CardViewer = ({ navigation, route }) => {
           style={{
             flexDirection: "row",
             justifyContent: "center",
-            backgroundColor: isFlipped ? "orange" : "green",
+            backgroundColor: isFlipped ? "green" : "orange",
           }}
         >
           <Ionicons name="arrow-back" size={24} color="black" />
           <Text style={{ fontSize: 18, margin: 10 }}>Previous</Text>
         </TouchableOpacity>
+        <Text>{currentIndex + 1 + " of " + cards.length + " cards"}</Text>
         <TouchableOpacity
           onPress={moveToNextCard}
           disabled={currentIndex === cards.length - 1}
           style={{
             flexDirection: "row",
             justifyContent: "center",
-            backgroundColor: isFlipped ? "orange" : "green",
+            backgroundColor: isFlipped ? "green" : "orange",
           }}
         >
           <Text style={{ fontSize: 18, margin: 10 }}>Next</Text>

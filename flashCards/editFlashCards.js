@@ -67,19 +67,23 @@ const CardGroupPage = ({ navigation, route }) => {
   };
 
   const saveGroup = async () => {
-    try {
-      await AsyncStorage.setItem(
-        "cardGroupLists",
-        JSON.stringify(savedCards.concat({ [`${groupName}`]: cards }))
-      );
-      Alert.alert("Group of cards saved successfully!");
-      setFrontText("");
-      setBackText("");
-      setGroupName("");
-      setCards([]);
-      navigation.navigate("FlashcardGroups");
-    } catch (error) {
-      Alert.alert("Error saving cards:");
+    if (groupName && frontText && backText) {
+      try {
+        await AsyncStorage.setItem(
+          "cardGroupLists",
+          JSON.stringify(savedCards.concat({ [`${groupName}`]: cards }))
+        );
+        Alert.alert("Group of cards saved successfully!");
+        setFrontText("");
+        setBackText("");
+        setGroupName("");
+        setCards([]);
+        navigation.navigate("FlashcardGroups");
+      } catch (error) {
+        Alert.alert("Error saving cards:");
+      }
+    } else {
+      Alert.alert("All the fields are required!");
     }
   };
 

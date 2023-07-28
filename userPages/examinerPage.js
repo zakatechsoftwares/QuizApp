@@ -174,7 +174,11 @@ const ExaminerPage = ({ navigation }) => {
           );
         }}
         keyExtractor={(item, index) =>
-          item.scheduledQuizId ? item.scheduledQuizId : item.attemptedQuizId
+          item.scheduledQuizId
+            ? item.scheduledQuizId
+            : item.attemptedQuizId
+            ? item.attemptedQuizId
+            : item.quizId
         }
       />
     </View>

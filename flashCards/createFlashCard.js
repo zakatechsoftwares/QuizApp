@@ -37,7 +37,7 @@ const CardGroupPage = ({ navigation, route }) => {
   // console.log(savedCards)
 
   const addCard = () => {
-    if (frontText && backText) {
+    if (groupName && frontText && backText) {
       const newCard = {
         front: frontText,
         back: backText,
@@ -46,6 +46,8 @@ const CardGroupPage = ({ navigation, route }) => {
       setCards([...cards, newCard]);
       setFrontText("");
       setBackText("");
+    } else {
+      Alert.alert("All the fields are required!");
     }
   };
 
