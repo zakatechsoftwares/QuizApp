@@ -64,6 +64,7 @@ const AttemptQuiz = ({ navigation, route }) => {
   let focused = useIsFocused();
   const yPosition = scrollIndex * 50;
   const scrollYRef = useRef(0);
+  let [startTime, setStartTime] = useState(false);
 
   const navigationHideDrawer = useNavigation();
 
@@ -257,21 +258,25 @@ const AttemptQuiz = ({ navigation, route }) => {
   // }, timer);
 
   useEffect(() => {
-    let timeout = setTimeout(() => {
-      timer > 0 && setTimer(timer - 1);
-      let hr = Math.floor(timer / 3600);
-      let min = Math.floor((timer % 3600) / 60);
-      let sec = Math.floor((timer % 3600) % 60);
-      setClock(
-        `${hr < 0 ? 0 : hr}hr : ${min > 0 ? min : 0}min : ${sec > 0 ? sec : 0}s`
-      );
-      if (timer === 0) {
-        timeUp();
-      }
-    }, 1000);
+    if (startTime === true) {
+      let timeout = setTimeout(() => {
+        timer > 0 && setTimer(timer - 1);
+        let hr = Math.floor(timer / 3600);
+        let min = Math.floor((timer % 3600) / 60);
+        let sec = Math.floor((timer % 3600) % 60);
+        setClock(
+          `${hr < 0 ? 0 : hr}hr : ${min > 0 ? min : 0}min : ${
+            sec > 0 ? sec : 0
+          }s`
+        );
+        if (timer === 0) {
+          timeUp();
+        }
+      }, 1000);
 
-    return () => clearTimeout(timeout);
-  }, [timer]);
+      return () => clearTimeout(timeout);
+    }
+  }, [timer, startTime]);
 
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -335,35 +340,57 @@ const AttemptQuiz = ({ navigation, route }) => {
 
   useFocusEffect(
     useCallback(() => {
-      (async () => {
-        const data = await firestore()
-          .collection("users")
-          .doc(quizGroupName)
-          .get();
-        //const quizId = data.data().scheduledQuiz[6].quizId
-        const quix = data.data()[quizGroupNameRaw].quizBank;
+      firestore()
+        .collection("users")
+        .doc(quizGroupName)
+        .get()
+        .then((data) => {
+          const quix = data.data()[quizGroupNameRaw].quizBank;
 
-        // const quiz = JSON.parse(quix[0])
-        let quex = quix.filter(
-          (element) => JSON.parse(element).quizId === quizId
-        );
-        quex = JSON.parse(quex);
-        //   randomize(quex)
+          // const quiz = JSON.parse(quix[0])
+          let quex = quix.filter(
+            (element) => JSON.parse(element).quizId === quizId
+          );
+          quex = JSON.parse(quex);
+          //   randomize(quex)
 
-        let hr = isNaN(quex.timeAllowedHr) ? 0 : Number(quex.timeAllowedHr);
-        let min = isNaN(quex.timeAllowedMin) ? 0 : Number(quex.timeAllowedMin);
-        let timers = hr * 60 * 60 + min * 60;
+          let hr = isNaN(quex.timeAllowedHr) ? 0 : Number(quex.timeAllowedHr);
+          let min = isNaN(quex.timeAllowedMin)
+            ? 0
+            : Number(quex.timeAllowedMin);
+          let timers = hr * 60 * 60 + min * 60;
 
-        setTimer(timers);
-        setResponse([]);
-        setQuiz(shuffleArray(quex));
-        setMinute(quex.timeAllowedMin);
-        setHour(quex.timeAllowedHr);
-        setValidateResponse(false);
+          setTimer(timers);
+          setResponse([]);
+          setQuiz(shuffleArray(quex));
+          setMinute(quex.timeAllowedMin);
+          setHour(quex.timeAllowedHr);
+          setValidateResponse(false);
 
-        await AsyncStorage.setItem("quixId", shuffleArray(quex).quizId);
-        await AsyncStorage.setItem("quixName", shuffleArray(quex).quizName);
-      })();
+          AsyncStorage.setItem("quixId", shuffleArray(quex).quizId);
+          AsyncStorage.setItem("quixName", shuffleArray(quex).quizName);
+
+          const validButtons = [
+            {
+              text: "Ok",
+              style: "destructive",
+              // If the user confirmed, then we dispatch the action we blocked earlier
+              // This will continue the action that had triggered the removal of the screen
+              onPress: () => {
+                setStartTime(true);
+              },
+            },
+          ];
+
+          Alert.alert(
+            "Examiners instruction",
+            quex.examinerInstructions || "No Instructions",
+            validButtons.map((buttonText) => ({
+              text: buttonText.text,
+              onPress: buttonText.onPress,
+            }))
+          );
+        });
     }, [route.params.quizId])
   );
 

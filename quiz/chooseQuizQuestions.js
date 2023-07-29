@@ -33,6 +33,7 @@ const ChooseQuizQuestion = ({ navigation, route }) => {
   const [timeAllowedMin, setTimeAllowedMin] = useState();
   const [negFacMc, setNegFacMc] = useState("");
   const [negFacSba, setNegFacSba] = useState("");
+  const [examinerInstructions, setExaminerInstructions] = useState("");
 
   let currentGroupName = useSelector((state) => state.user).currentGroupName;
   const quizGroupNameRaw = currentGroupName;
@@ -115,7 +116,12 @@ const ChooseQuizQuestion = ({ navigation, route }) => {
   const submitQuiz = async () => {
     // console.log(firestore().Timestamp)
 
-    if (quizName && selectedQuestions && (timeAllowedHr || timeAllowedMin)) {
+    if (
+      quizName &&
+      selectedQuestions &&
+      (timeAllowedHr || timeAllowedMin) &&
+      examinerInstructions
+    ) {
       const date = Date.now().toString();
       let nanosec = date.nanoseconds + date.seconds * 1000000000;
 
@@ -134,6 +140,7 @@ const ChooseQuizQuestion = ({ navigation, route }) => {
               releaseResult: releaseResult,
               negFacMc: negFacMc,
               negFacSba: negFacSba,
+              examinerInstructions: examinerInstructions,
               quizQuestions: selectedQuestions,
             })
           ),
@@ -141,7 +148,14 @@ const ChooseQuizQuestion = ({ navigation, route }) => {
 
       navigation.navigate("Quiz Bank");
     } else {
-      Alert.alert("Quiz Name, one of the time fields and a quiz is required.");
+      Alert.alert(
+        "Required fields",
+        `The following fields are mandatory:
+      1. Quiz Title.
+      2.At least one of the times fields.
+      3.The instructions to the candidate
+      4.At least one question should be selected`
+      );
     }
   };
 
@@ -218,7 +232,14 @@ const ChooseQuizQuestion = ({ navigation, route }) => {
                       placeholder="SBA Neg factor for negative marking(if any)"
                       // defaultValue='0'
                     />
-
+                    <TextInput
+                      name="examinerInstructions"
+                      onChangeText={setExaminerInstructions}
+                      value={examinerInstructions}
+                      style={styles.input}
+                      placeholder="Instructions to the candidate"
+                      // defaultValue='0'
+                    />
                     {/* <SelectList 
          data={ReleaseResult} 
          setSelected={(res)=>setReleaseResult(res)} 
