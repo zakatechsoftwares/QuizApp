@@ -92,7 +92,7 @@ const CreateBiodata = (prop) => {
         placeholder="Your Sex"
         search={false}
       />
-      <Text style={styles.error}>{prop.sexError}</Text>
+      {prop.sexError && <Text style={styles.error}>{prop.sexError}</Text>}
 
       {/* <RNPickerSelect 
           placeholder={{label:'Select your Country', value: null}}
@@ -105,21 +105,18 @@ const CreateBiodata = (prop) => {
 
       {/* <SelectList data={countryList} setSelected={(country)=>prop.setFieldValue('country',country)} save='value' placeholder='Choose Country'
          search={false}/> */}
-      <Text style={styles.error}>{prop.countryError}</Text>
 
       {/* <Text variant='titleLarge'>Birth Date:{prop.value.dateOfBirth} </Text> */}
-      <TouchableOpacity onPress={() => setShow(true)}>
-        <TextInput
-          name="email"
-          //  onChangeText={prop.handleChange('email')}
-          //  onBlur={prop.handleBlur('email')}
-          //  value={prop.value.email}
-          style={prop.style}
-          placeholder={prop.value.dateOfBirth || "Choose your date of birth"}
-          editable={false}
-          //  validate={prop.validatefield}
+
+      <View style={{ width: "100%" }}>
+        <Button
+          title={prop.value.dateOfBirth || "Choose your date of birth"}
+          onPress={() => setShow(true)}
         />
-      </TouchableOpacity>
+        {prop.dateOfBirthError && (
+          <Text style={styles.error}>{prop.dateOfBirthError}</Text>
+        )}
+      </View>
       <DateTimePickerModal
         isVisible={show}
         mode={"date"}
@@ -127,15 +124,11 @@ const CreateBiodata = (prop) => {
           prop.setFieldValue("dateOfBirth", new Date(arg).toDateString()) &&
             setShow(false);
         }}
-        onCancel={() => setShow(false)}
+        onCancel={() => {
+          prop.setFieldValue("dateOfBirth", "");
+          setShow(false);
+        }}
       />
-      <Text style={styles.error}>{prop.dateOfBirthError}</Text>
-      {/* <View style={{ flexDirection:'row'}}>
-              <View style={{width:'100%'}}>
-              <Button title='Choose Date of Birth' onPress={()=> setShow(true)} color='#008000'/>
-              </View>
-             
-         </View> */}
     </View>
   );
 };

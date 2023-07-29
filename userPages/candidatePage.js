@@ -37,7 +37,7 @@ const CandidatePage = ({ navigation }) => {
       .doc(quizGroupName)
       .update({
         [`${quizGroupNameRaw}.attemptedQuiz`]: firestore.FieldValue.arrayUnion({
-          dateCreated: new Date(),
+          // dateCreated: new Date(),
           //quizId: Math.random().toString(36).substring(2, 12),
           //attemptedQuizId: Math.random().toString(36).substring(2, 12),
           quizName: item.quizName,

@@ -93,9 +93,12 @@ const StackProfilePage = ({ navigation }) => {
         component={ContactUsPage}
         options={{ title: "Contact Us", headerShown: true }}
       />
-      {paymentStatus === false && dbUserFirstName ? ( //paymentStatus &&
-        <Stack.Screen name="Payment" component={PaymentPage} />
-      ) : null}
+      {
+        //paymentStatus === false &&
+        dbUserFirstName ? ( //paymentStatus &&
+          <Stack.Screen name="Payment" component={PaymentPage} />
+        ) : null
+      }
     </Stack.Navigator>
   );
 };

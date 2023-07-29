@@ -50,7 +50,7 @@
           }
         ]
       },
-      "buildNumber": "11"
+      "buildNumber": "15"
     },
     "android": {
       "adaptiveIcon": {
@@ -59,7 +59,7 @@
       },
       "googleServicesFile": "./google-services.json",
       "package": "com.zakatechsoftware.QuizAp",
-      "versionCode": 20
+      "versionCode": 22
     },
     "web": {
       "favicon": "./assets/favicon.png"

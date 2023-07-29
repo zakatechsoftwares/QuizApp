@@ -175,7 +175,7 @@ const AttemptQuiz = ({ navigation, route }) => {
     };
 
     const notAttemptedQuiz = {
-      dateCreated: new Date(),
+      // dateCreated: new Date(),
       //quizId: Math.random().toString(36).substring(2, 12),
       //attemptedQuizId: Math.random().toString(36).substring(2, 12),
       quizName: quizName,
@@ -197,6 +197,13 @@ const AttemptQuiz = ({ navigation, route }) => {
     setValidateResponse(true);
 
     const docRef = firestore().collection("users").doc(quizGroupName);
+
+    // docRef.get().(
+    //   data=>{
+    //     let attempted= data.data().attemptedQuiz
+    //     attempted= attempted.filter(ele=>ele.)
+    //   }
+    // )
 
     docRef
       .update({

@@ -80,7 +80,7 @@ const Drawer = createDrawerNavigator();
 function App() {
   const dispatch = useDispatch();
   const isMounted = useRef(false);
-
+  let [showAdvert, setShowAdvert] = useState(false);
   let dbUserFirstName = useSelector((state) => state.user).dbUserFirstName;
   let dbUserLastName = useSelector((state) => state.user).dbUserLastName;
   let dbUserMiddleName = useSelector((state) => state.user).dbUserMiddleName;
@@ -287,25 +287,27 @@ function App() {
                 let updatedGroupMemberships = groupMembership.filter(
                   (ele) => ele.name !== groupToJoin || ele.cadre === "Admin"
                 );
-                updatedGroupMemberships = [
-                  ...updatedGroupMemberships,
-                  {
-                    cadre: invitedCadre,
-                    name: groupToJoin,
-                  },
-                ];
+                //  updatedGroupMemberships = ;
                 //console.log("updatedGroupMemberships", updatedGroupMemberships);
+                let ownGroupMemberships = updatedGroupMemberships.findIndex(
+                  (ele) => ele.name === groupToJoin
+                );
 
-                docRef
-                  .update({
+                if (ownGroupMemberships === -1) {
+                  docRef.update({
+                    groupMembership: [
+                      ...updatedGroupMemberships,
+                      {
+                        cadre: invitedCadre,
+                        name: groupToJoin,
+                      },
+                    ],
+                  });
+                } else {
+                  docRef.update({
                     groupMembership: updatedGroupMemberships,
-                  })
-                  .catch((err) =>
-                    Alert.alert(
-                      "groupMembership could not be added",
-                      err.message
-                    )
-                  );
+                  });
+                }
               } else {
                 // console.log("updateGroupMembership1", [
                 //   {
@@ -489,7 +491,8 @@ function App() {
                         : false;
 
                     paid = data2 || data1 || data3 ? true : false;
-
+                    let data4 = data1 ? false : true;
+                    setShowAdvert(data4);
                     dispatch(setLoading(false));
                     dispatch(setDbUser(JSON.stringify(user)));
                     dispatch(setDbUserFirstName(user.firstName));
@@ -529,14 +532,7 @@ function App() {
     const unsubscribe = interstitial.addAdEventListener(
       AdEventType.LOADED,
       () => {
-        if (
-          // (paymentStatus === false &&
-          //   Date.now() - dbUser?.dateJoined < 7 * 86400000) ||
-          // (paymentStatus === false &&
-          //   Date.now() - dbUser?.dateJoined > 7 * 86400000)
-          paymentStatus === false ||
-          dbUserExempted === true // && dbUser?.payments?.length===0
-        ) {
+        if (showAdvert) {
           interstitial.show();
         }
       }
@@ -547,7 +543,7 @@ function App() {
 
     // Unsubscribe from events on unmount
     return unsubscribe;
-  }, []);
+  }, [showAdvert]);
 
   if (loading) {
     return (
@@ -723,16 +719,16 @@ function App() {
                   }
                 />
 
-                {paymentStatus || (
-                  <DrawerItem
-                    label="Subscribe"
-                    onPress={() =>
-                      props.navigation.navigate("ProfileStack", {
-                        screen: "Payment",
-                      })
-                    }
-                  />
-                )}
+                {/* {paymentStatus || ( */}
+                <DrawerItem
+                  label="Subscribe"
+                  onPress={() =>
+                    props.navigation.navigate("ProfileStack", {
+                      screen: "Payment",
+                    })
+                  }
+                />
+                {/* )} */}
 
                 <DrawerItem
                   label="About the App"
@@ -818,31 +814,27 @@ function App() {
             />
           )}
         </Drawer.Navigator>
-        {/* {((paymentStatus === false &&
-          Date.now() - dbUserDateJoined < 7 * 86400000) ||
-          (paymentStatus === false &&
-            Date.now() - dbUserDateJoined > 7 * 86400000) ||
-          dbUserExempted === true) && ( */}
-        <View
-          style={{
-            justifyContent: "center",
-            width: "100%", //borderWidth:2,
-            marginTop: Platform.OS === "ios" ? 0 : 20,
-            alignItems: "center",
-            alignSelf: "center",
-            borderRadius: 10,
-            flexDirection: "row",
-          }}
-        >
-          <BannerAd
-            unitId={adUnitIdBanner}
-            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-            requestOptions={{
-              requestNonPersonalizedAdsOnly: true,
+        {showAdvert && (
+          <View
+            style={{
+              justifyContent: "center",
+              width: "100%", //borderWidth:2,
+              marginTop: Platform.OS === "ios" ? 0 : 20,
+              alignItems: "center",
+              alignSelf: "center",
+              borderRadius: 10,
+              flexDirection: "row",
             }}
-          />
-        </View>
-        {/* )} */}
+          >
+            <BannerAd
+              unitId={adUnitIdBanner}
+              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+              requestOptions={{
+                requestNonPersonalizedAdsOnly: true,
+              }}
+            />
+          </View>
+        )}
       </NavigationContainer>
     );
   }
