@@ -40,6 +40,7 @@ import {
   appleAuth,
 } from "@invertase/react-native-apple-authentication";
 import { Platform } from "react-native";
+import * as AppleAuthentication from "expo-apple-authentication";
 
 const SigninPage = ({ navigation }) => {
   let dispatch = useDispatch();
@@ -50,6 +51,27 @@ const SigninPage = ({ navigation }) => {
   const [initializing, setInitializing] = useState(true);
   const [show, setShow] = useState(false);
 
+  // async function onAppleButtonPress() {
+  //   async () => {
+  //     try {
+  //       const credential = await AppleAuthentication.signInAsync({
+  //         requestedScopes: [
+  //           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+  //           AppleAuthentication.AppleAuthenticationScope.EMAIL,
+  //         ],
+  //       });
+  //       console.log(credential);
+  //       return auth().signInWithCredential(credential);
+  //     } catch (e) {
+  //       if (e.code === "ERR_REQUEST_CANCELED") {
+  //         // handle that the user canceled the sign-in flow
+  //       } else {
+  //         Alert.alert("Apple Sign-In failed");
+  //       }
+  //     }
+  //   };
+  // }
+
   async function onAppleButtonPress() {
     // Start the sign-in request
     const appleAuthRequestResponse = await appleAuth.performRequest({
@@ -59,7 +81,7 @@ const SigninPage = ({ navigation }) => {
 
     // Ensure Apple returned a user identityToken
     if (!appleAuthRequestResponse.identityToken) {
-      Alert.alert("Apple Sign-In failed");
+      throw new Error("Apple Sign-In failed - no identify token returned");
     }
 
     // Create a Firebase credential from the response
@@ -353,7 +375,87 @@ const SigninPage = ({ navigation }) => {
                 width: 200, // You must specify a width
                 height: 48, // You must specify a height
               }}
-              onPress={() => onAppleButtonPress()}
+              onPress={() => {
+                onAppleButtonPress()
+                  .then((credentials) => {
+                    console.log(credentials)(
+                      // dispatch(setUserEmail(credentials.user.email));
+                      // dispatch(setUserId(credentials.user.uid));
+                      // dispatch(setEmailVerified(credentials.user.emailVerified));
+                      // dispatch(fetchUser(credentials.user.uid));
+                      // dispatch(setLoading(false));
+                      // Alert.alert("you are now signed in with google button");
+
+                      async () => {
+                        try {
+                          firestore()
+                            .collection("users")
+                            .doc(credentials.uid)
+                            .get()
+                            .then((userDoc) => {
+                              if (userDoc.exists) {
+                                const user = userDoc.data();
+                                let paid = false;
+
+                                let data1 =
+                                  user &&
+                                  Array.isArray(user.payments) &&
+                                  user.payments.length > 0
+                                    ? user?.payments[user?.payments?.length - 1]
+                                        ?.nextDueDate > Date.now()
+                                    : false;
+
+                                let data2 = user?.exempted ?? false;
+                                let data3 =
+                                  user !== undefined &&
+                                  user?.dateJoined !== undefined
+                                    ? Date.now() - user?.dateJoined ??
+                                      Date.now() < 7 * 86400000
+                                    : false;
+
+                                paid = data2 || data1 || data3 ? true : false;
+
+                                dispatch(setLoading(false));
+                                dispatch(
+                                  setEmailVerified(credentials.emailVerified)
+                                );
+                                //dispatch(fetchUser(credentials.uid));
+                                dispatch(setUserEmail(credentials.email));
+                                dispatch(setDbUser(JSON.stringify(user)));
+                                dispatch(setDbUserFirstName(user.firstName));
+                                dispatch(setDbUserLastName(user.lastName));
+                                dispatch(
+                                  setDbUserMiddleName(user.middleNameName)
+                                );
+                                setInitializing(false);
+                                dispatch(setUserId(credentials.uid));
+                                dispatch(setPaymentStatus(paid));
+                                dispatch(setDbUserDateJoined(user.dateJoined));
+                                dispatch(setDbUserExempted(user.exempted));
+                              }
+                            })
+                            .catch((err) => {
+                              dispatch(setLoading(false));
+                              "dbUser could not be found" + err.message;
+                            });
+
+                          // let data = JSON.stringify({ user, paid });
+
+                          // return data;
+                        } catch (error) {
+                          // Alert.alert("Error fetching user:", error);
+                          throw error?.message;
+                          dispatch(setLoading(false));
+                        }
+                      }
+                    )();
+                  })
+                  .catch((error) => {
+                    setInitializing(false);
+                    Alert.alert("An error occured" + error.message);
+                    dispatch(setLoading(false));
+                  });
+              }}
             />
           )}
           {show || (

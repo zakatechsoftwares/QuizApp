@@ -600,6 +600,16 @@ function App() {
         }
       } else {
         dispatch(setLoading(false));
+        dispatch(setUserEmail(null));
+        //dispatch(setCurrentGroupCadre(null));
+        dispatch(setCurrentGroupCadre(null));
+        dispatch(setCurrentGroupName(null));
+        dispatch(setDbUser(null));
+        dispatch(setUserEmail(null));
+        dispatch(setEmailVerified(false));
+        dispatch(setDbUserFirstName(null));
+        dispatch(setDbUserLastName(null));
+        dispatch(setDbUserMiddleName(null));
       }
     });
 

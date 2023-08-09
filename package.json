@@ -59,7 +59,8 @@
     "react-native-webview": "^13.2.2",
     "react-redux": "^8.1.1",
     "yup": "^1.2.0",
-    "expo-tracking-transparency": "~3.0.3"
+    "expo-tracking-transparency": "~3.0.3",
+    "expo-apple-authentication": "~6.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
