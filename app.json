@@ -37,29 +37,26 @@
             "useFrameworks": "static"
           }
         }
+      ],
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+        }
       ]
     ],
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "associatedDomains": [
-        "applinks:zakatechsoftwarequizap.page.link"
-      ],
+      "associatedDomains": ["applinks:zakatechsoftwarequizap.page.link"],
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.zakatechsoftware.QuizAp",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "fetch",
-          "remote-notification"
-        ],
+        "UIBackgroundModes": ["fetch", "remote-notification"],
         "CFBundleURLTypes": [
           {
             "CFBundleTypeRole": "Editor",
-            "CFBundleURLSchemes": [
-              "com.zakatechsoftware.QuizAp"
-            ]
+            "CFBundleURLSchemes": ["com.zakatechsoftware.QuizAp"]
           }
         ]
       },

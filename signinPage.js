@@ -35,6 +35,11 @@ import {
   setDbUserExempted,
 } from "./redux/userSlice";
 import firestore from "@react-native-firebase/firestore";
+import {
+  AppleButton,
+  appleAuth,
+} from "@invertase/react-native-apple-authentication";
+import { Platform } from "react-native";
 
 const SigninPage = ({ navigation }) => {
   let dispatch = useDispatch();
@@ -44,6 +49,29 @@ const SigninPage = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [initializing, setInitializing] = useState(true);
   const [show, setShow] = useState(false);
+
+  async function onAppleButtonPress() {
+    // Start the sign-in request
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+      requestedOperation: appleAuth.Operation.LOGIN,
+      requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+    });
+
+    // Ensure Apple returned a user identityToken
+    if (!appleAuthRequestResponse.identityToken) {
+      Alert.alert("Apple Sign-In failed");
+    }
+
+    // Create a Firebase credential from the response
+    const { identityToken, nonce } = appleAuthRequestResponse;
+    const appleCredential = auth.AppleAuthProvider.credential(
+      identityToken,
+      nonce
+    );
+
+    // Sign the user in with the credential
+    return auth().signInWithCredential(appleCredential);
+  }
 
   async function onGoogleButtonPress() {
     dispatch(setLoading(true));
@@ -317,6 +345,17 @@ const SigninPage = ({ navigation }) => {
             }}
             // disabled={initializing}
           />
+          {Platform.OS === "ios" && (
+            <AppleButton
+              buttonStyle={AppleButton.Style.WHITE}
+              buttonType={AppleButton.Type.SIGN_IN}
+              style={{
+                width: 200, // You must specify a width
+                height: 48, // You must specify a height
+              }}
+              onPress={() => onAppleButtonPress()}
+            />
+          )}
           {show || (
             <Pressable style={styles.button} onPress={() => setShow(true)}>
               <Text style={styles.text}>Register if New User</Text>

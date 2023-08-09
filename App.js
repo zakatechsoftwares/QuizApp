@@ -60,6 +60,9 @@ import {
 } from "react-native-google-mobile-ads";
 import messaging from "@react-native-firebase/messaging";
 import * as Updates from "expo-updates";
+import { appleAuth } from "@invertase/react-native-apple-authentication";
+import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
+import { Settings } from "react-native-fbsdk-next";
 
 const adUnitIdBanner = __DEV__
   ? TestIds.BANNER
@@ -109,6 +112,14 @@ function App() {
     quizGroupNameRaw.indexOf("-")
   );
 
+  const { status } = requestTrackingPermissionsAsync();
+
+  Settings.initializeSDK();
+
+  if (status === "granted") {
+    Settings.setAdvertiserTrackingEnabled(true);
+  }
+
   async function requestUserPermission() {
     const authStatus = await messaging().requestPermission();
     const enabled =
@@ -134,6 +145,16 @@ function App() {
     }
   };
   Updates.useUpdateEvents(eventListener);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await requestTrackingPermissionsAsync();
+      Settings.initializeSDK();
+      if (status === "granted") {
+        await Settings.setAdvertiserTrackingEnabled(true);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     messaging().onNotificationOpenedApp((remoteMessage) => {
@@ -165,12 +186,47 @@ function App() {
     return unsubscribe;
   }, []);
 
+  async function revokeSignInWithAppleToken() {
+    // Get an authorizationCode from Apple
+    const { authorizationCode } = await appleAuth.performRequest({
+      requestedOperation: appleAuth.Operation.REFRESH,
+    });
+
+    // Ensure Apple returned an authorizationCode
+    if (!authorizationCode) {
+      Alert.alert("Apple Revocation failed - no authorizationCode returned");
+    }
+
+    // Revoke the token
+    return auth().revokeToken(authorizationCode);
+  }
+
   const deleteAccount = async () => {
     firestore()
       .collection("users")
       .doc(userId)
       .delete()
       .catch((error) => console.log(error));
+
+    if (Platform.OS === "ios") {
+      revokeSignInWithAppleToken()
+        .then(() => {
+          toggleRunUseEffect();
+          Alert.alert("Your account has been deleted.");
+
+          dispatch(setDbUser(null));
+          dispatch(setUserEmail(null));
+          dispatch(setCurrentGroupName(null));
+          dispatch(setCurrentGroupCadre(null));
+          dispatch(setEmailVerified(false));
+          dispatch(setDbUserFirstName(null));
+          dispatch(setDbUserLastName(null));
+          dispatch(setDbUserMiddleName(null));
+          dispatch(setRunAppUseEffect());
+        })
+        .catch((err) => Alert.alert(err.message));
+    }
+
     let user = auth().currentUser;
     user
       .delete()
@@ -191,7 +247,7 @@ function App() {
       .catch((error) => {
         if (error.code === "auth/requires-recent-login") {
           Alert.alert(
-            "This operation is sensitive and requires recent authentication. Log in again before retrying this request."
+            "This operation is sensitive and requires recent authentication. Log in retry."
           );
         }
       });
