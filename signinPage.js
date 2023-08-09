@@ -8,6 +8,7 @@ import {
   Pressable,
   Alert,
   ActivityIndicator,
+  ImageBackground,
 } from "react-native";
 import { useState, useEffect } from "react";
 import Register from "./register";
@@ -194,7 +195,7 @@ const SigninPage = ({ navigation }) => {
       {initializing && <ActivityIndicator />}
       {show || initializing || (
         <View style={{ justifyContent: "space-between" }}>
-          <Text style={{ textAlign: "center" }}> WELCOME SIGN IN</Text>
+          <Text style={{ textAlign: "center" }}> SIGN IN</Text>
           <TextInput
             name="email"
             value={email}
@@ -350,6 +351,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    opacity: 1,
   },
   button: {
     margin: 4,

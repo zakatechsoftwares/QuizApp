@@ -1,6 +1,5 @@
 import {
   Button,
-  FlatList,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -15,6 +14,7 @@ import { useState, useEffect } from "react";
 import { Text } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useSelector } from "react-redux";
+import { FlashList } from "@shopify/flash-list";
 
 const QuestionBank = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
@@ -143,12 +143,14 @@ const QuestionBank = ({ navigation, route }) => {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.inner}>
             <Button
+              color="green"
               title="Create New Question"
               onPress={() =>
                 navigation.navigate("Create Question", { item: null })
               }
             />
-            <FlatList
+            <FlashList
+              estimatedItemSize={200}
               data={questions}
               keyExtractor={(item) => item.questionId}
               renderItem={({ item }) => {

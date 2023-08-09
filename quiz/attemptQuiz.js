@@ -5,18 +5,8 @@ import {
   Alert,
   TouchableOpacity,
   Image,
-  Platform,
-  BackHandler,
-  ScrollView,
 } from "react-native";
-import React, {
-  useEffect,
-  useState,
-  useContext,
-  useRef,
-  useCallback,
-  useLayoutEffect,
-} from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Text, RadioButton } from "react-native-paper";
@@ -35,11 +25,11 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import { useScrollToTop } from "@react-navigation/native";
 
 import { useSelector } from "react-redux";
-import { Button } from "react-native";
+
 import GestureRecognizer from "react-native-swipe-gestures";
+import { FlashList } from "@shopify/flash-list";
 
 const AttemptQuiz = ({ navigation, route }) => {
   const { quizId, quizName } = route?.params;
@@ -65,6 +55,10 @@ const AttemptQuiz = ({ navigation, route }) => {
   const yPosition = scrollIndex * 50;
   const scrollYRef = useRef(0);
   let [startTime, setStartTime] = useState(false);
+  const config = {
+    velocityThreshold: 0.3,
+    gestureIsClickThreshold: 2,
+  };
 
   const navigationHideDrawer = useNavigation();
 
@@ -83,13 +77,6 @@ const AttemptQuiz = ({ navigation, route }) => {
 
   const navigationState = useNavigationState((state) => state);
   const currentScreen = navigationState?.routes[navigationState?.index]?.name;
-
-  // setCurrentScreen(currentScreen)
-
-  //   const alterParams=()=>  {
-  //     focused || setQuizIds(quizId)
-  //   }
-  // alterParams()
 
   const totalSba = (
     Array.isArray(quiz.quizQuestions) &&
@@ -295,40 +282,6 @@ const AttemptQuiz = ({ navigation, route }) => {
       e.preventDefault();
       // assess();
       onSubmit();
-      //    setQuixId()
-      //  setQuixName(AsyncStorage.getItem('quixName'))
-
-      // Prompt the user before leaving the screen
-      // Alert.alert(
-      //   "You are about to Submit Quiz",
-      //   "Are you sure you want to submit?",
-      //   [
-      //     {
-      //       text: "Don't submit",
-      //       style: "cancel",
-      //       onPress: () => {
-      //         navigation.navigate("StackAttemptQuiz", {
-      //           screen: "Attempt Quiz",
-      //           params: { quizId: quizId, quizName: quizName },
-      //         });
-      //       },
-      //     },
-      //     {
-      //       text: "Submit",
-      //       style: "destructive",
-      //       // If the user confirmed, then we dispatch the action we blocked earlier
-      //       // This will continue the action that had triggered the removal of the screen
-      //       onPress: () => {
-      //         (async () => {
-      //           const quixIds = await AsyncStorage.getItem("quixId");
-      //           // console.log(quixIds)
-      //           assess();
-      //           navigation.dispatch(e.data.action);
-      //         })();
-      //       },
-      //     },
-      //   ]
-      // );
     };
 
     // if(Platform.OS === 'android'){
@@ -568,6 +521,7 @@ const AttemptQuiz = ({ navigation, route }) => {
             onSwipeUp={(state) => {
               topOptionBoxValue.value = 0;
             }}
+            config={config}
           >
             {Array.isArray(quiz.quizQuestions) &&
               //  shuffleArray

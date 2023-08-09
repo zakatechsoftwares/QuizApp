@@ -18,6 +18,19 @@
       "@react-native-firebase/crashlytics",
       "@react-native-firebase/dynamic-links",
       [
+        "react-native-fbsdk-next",
+        {
+          "displayName": "My QuizAp",
+          "appID": "823879926010127",
+          "clientToken": "3869fd2a3e2828b0869e98e336279ff9",
+          "scheme": "fb823879926010127",
+          "advertiserIDCollectionEnabled": true,
+          "autoLogAppEventsEnabled": true,
+          "isAutoInitEnabled": true,
+          "iosUserTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "ios": {
@@ -50,7 +63,7 @@
           }
         ]
       },
-      "buildNumber": "15"
+      "buildNumber": "16"
     },
     "android": {
       "adaptiveIcon": {
@@ -59,7 +72,7 @@
       },
       "googleServicesFile": "./google-services.json",
       "package": "com.zakatechsoftware.QuizAp",
-      "versionCode": 22
+      "versionCode": 25
     },
     "web": {
       "favicon": "./assets/favicon.png"

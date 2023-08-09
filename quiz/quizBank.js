@@ -1,6 +1,5 @@
 import {
   Button,
-  FlatList,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -9,6 +8,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
+  Alert,
+  FlatList,
 } from "react-native";
 import { useEffect, useState } from "react";
 import React from "react";
@@ -16,6 +17,7 @@ import { Text } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import firestore from "@react-native-firebase/firestore";
 import { useSelector } from "react-redux";
+//import { FlashList } from "@shopify/flash-list";
 
 const QuizBank = ({ navigation }) => {
   let dbUser = JSON.parse(useSelector((state) => state.user).DbUser);
@@ -130,18 +132,31 @@ const QuizBank = ({ navigation }) => {
               <View style={{ borderWidth: 1, flexDirection: "row" }}>
                 <View style={{ width: "50%" }}>
                   <Button
+                    color="green"
                     title="Create Quiz"
                     onPress={() => navigation.navigate("Choose Quiz Questions")}
                   />
                 </View>
                 <View style={{ width: "50%" }}>
                   <Button
+                    color="green"
                     title="Schedule Quiz"
                     onPress={() => {
-                      SubmitSchedule();
-                      setRunUseEffect(!runUseEffect);
+                      if (selected && schedule) {
+                        SubmitSchedule();
+                        setRunUseEffect(!runUseEffect);
+                      } else {
+                        Alert.alert(
+                          "Required fields",
+                          `The following fields are mandatory:
+      1.Scheduled Date.
+      2.Scheduled Time.
+      3.One Quiz should be selected.
+   `
+                        );
+                      }
                     }}
-                    disabled={selected && schedule ? false : true}
+                    // disabled={selected && schedule ? false : true}
                   />
                 </View>
               </View>
@@ -157,16 +172,25 @@ const QuizBank = ({ navigation }) => {
                 />
                 <View style={{ borderWidth: 1, flexDirection: "row" }}>
                   <View style={{ width: "50%" }}>
-                    <Button title="Set Date" onPress={() => showMode("date")} />
+                    <Button
+                      color="green"
+                      title="Set Date"
+                      onPress={() => showMode("date")}
+                    />
                   </View>
                   <View style={{ width: "50%" }}>
-                    <Button title="Set Time" onPress={() => showMode("time")} />
+                    <Button
+                      color="green"
+                      title="Set Time"
+                      onPress={() => showMode("time")}
+                    />
                   </View>
                 </View>
               </View>
 
               {/* <Text style={{fontSize: 20}}>You selected {selectedQuestionId.length} remaining {questions.length} questions</Text> */}
               <FlatList
+                estimatedItemSize={200}
                 data={quiz}
                 keyExtractor={(item) => JSON.parse(item)?.quizId}
                 //  ListHeaderComponent={
@@ -197,6 +221,8 @@ const QuizBank = ({ navigation }) => {
                         borderColor: "green",
                         borderWidth: 1,
                         padding: 5,
+                        opacity:
+                          selected === JSON.parse(item)?.quizId ? 0.5 : 1,
                         backgroundColor:
                           selected === JSON.parse(item)?.quizId
                             ? "green"
@@ -258,12 +284,13 @@ const QuizBank = ({ navigation }) => {
                                 <View
                                   style={{
                                     width: "30%",
-                                    backgroundColor: "red",
+                                    //backgroundColor: "red",
                                     justifyContent: "center",
                                     alignItems: "center",
                                   }}
                                 >
                                   <Button
+                                    color="red"
                                     title="Cancel Schedule"
                                     onPress={() => {
                                       CancelSchedule(element);

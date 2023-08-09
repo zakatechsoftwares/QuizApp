@@ -6,13 +6,13 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
-  FlatList,
 } from "react-native";
 import { useCallback, useState, useEffect } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { Text } from "react-native-paper";
 import { useSelector } from "react-redux";
 import firestore from "@react-native-firebase/firestore";
+import { FlashList } from "@shopify/flash-list";
 
 const AllAttempts = ({ navigation, route }) => {
   const [allAttempts, setAllAttempts] = useState([]);
@@ -87,7 +87,8 @@ const AllAttempts = ({ navigation, route }) => {
 
             <View style={{ borderWidth: 2 }} />
 
-            <FlatList
+            <FlashList
+              estimatedItemSize={200}
               data={allAttempts}
               renderItem={({ item }) => {
                 return (
@@ -100,7 +101,6 @@ const AllAttempts = ({ navigation, route }) => {
                   </View>
                 );
               }}
-              estimatedItemSize={200}
             />
           </View>
         </TouchableWithoutFeedback>

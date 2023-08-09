@@ -27,10 +27,7 @@ import {
   useIsFocused,
 } from "@react-navigation/native";
 import firestore from "@react-native-firebase/firestore";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import { FlashList } from "@shopify/flash-list";
 import { useSelector } from "react-redux";
 
 const ReviewAttempts = ({ navigation, route }) => {

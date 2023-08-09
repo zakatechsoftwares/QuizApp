@@ -25,7 +25,7 @@ const CreateQuestion = ({ navigation, route }) => {
   const { item, questions } = route.params;
   const isMounted = useRef(false);
   const [sbaError, setSbaError] = useState(false);
-
+  let questionCategory = useSelector((state) => state.user).questionCategory;
   let currentGroupName = useSelector((state) => state.user).currentGroupName;
   const quizGroupNameRaw = currentGroupName;
   const quizGroupName = quizGroupNameRaw.substring(
@@ -131,8 +131,8 @@ const CreateQuestion = ({ navigation, route }) => {
           is_correct: yup.boolean(),
         })
       )
-      .min(4, "Options should be 4 or 5")
-      .max(5, "Options should be 4 or 5"),
+      .min(3, "The number of options should be 3 to 5")
+      .max(5, "The number of options should be 3 to 5"),
     // .when('questionType',{
     //   is : 'Single Best Answer',
     //   then : yup.array().test(
@@ -160,16 +160,18 @@ const CreateQuestion = ({ navigation, route }) => {
     }
   };
 
-  let subject = Array.from(Array(100).keys());
-  subject.shift();
-  subject = subject.map((element) => ({
-    label: `Course-${element}`,
-    key: `Course-${element}`,
-  }));
+  // let subject = Array.from(Array(100).keys());
+  // subject.shift();
+  subject = Array.isArray(questionCategory)
+    ? questionCategory.map((element) => ({
+        key: element,
+        value: element,
+      }))
+    : [{ key: "Not specified", value: "Not specified" }];
 
   const questionTypes = [
-    { key: "Single Best Answer", label: "Single Best Answer" },
-    { key: "Multiple Choice", label: "Multiple Choice" },
+    { key: "Single Best Answer", value: "Single Best Answer" },
+    { key: "Multiple Choice", value: "Multiple Choice" },
   ];
 
   const onSubmit = async (values) => {
@@ -232,8 +234,8 @@ const CreateQuestion = ({ navigation, route }) => {
                   deleteQuestion();
                   onSubmit(values).then(() => {
                     actions.setSubmitting(false);
-                    actions.resetForm(reinitialValue);
                   });
+                  actions.resetForm(initialValue);
                 }}
               >
                 {(formik) => {
@@ -248,19 +250,43 @@ const CreateQuestion = ({ navigation, route }) => {
                       />
                       {/* <Text><ErrorMessage name='author' /></Text> */}
 
-                      <ModalSelector
+                      <SelectList
+                        data={subject}
+                        setSelected={(option) =>
+                          formik.setFieldValue(
+                            "subject",
+                            option || formik.values.subject
+                          )
+                        }
+                        save="value"
+                        placeholder={formik.values.subject}
+                        search={false}
+                      />
+                      {/* <ModalSelector
                         data={subject}
                         initValue={
-                          formik.values.subject
-                            ? formik.values.subject
+                          
                             : "Select the Course"
                         }
                         onChange={(option) =>
                           formik.setFieldValue("subject", option.label)
                         }
+                      /> */}
+
+                      <SelectList
+                        data={questionTypes}
+                        setSelected={(option) =>
+                          formik.setFieldValue(
+                            "questionType",
+                            option || formik.values.questionType
+                          )
+                        }
+                        save="value"
+                        placeholder={formik.values.questionType}
+                        search={false}
                       />
 
-                      <ModalSelector
+                      {/* <ModalSelector
                         data={questionTypes}
                         initValue={
                           formik.values.questionType
@@ -270,7 +296,7 @@ const CreateQuestion = ({ navigation, route }) => {
                         onChange={(option) =>
                           formik.setFieldValue("questionType", option.label)
                         }
-                      />
+                      /> */}
                       <UploadFiles
                         setFieldValue={formik.setFieldValue}
                         //imageFieldError={<ErrorMessage name='image' />}
@@ -431,18 +457,40 @@ const CreateQuestion = ({ navigation, route }) => {
                       />
                       {/* onSubmit was not reponding to call when 'handleSubmit' was used, i therefore resorted to using the onSubmit call directly */}
                       <Button
-                        onPress={formik.handleSubmit}
+                        color="green"
+                        onPress={() => {
+                          if (sbaError) {
+                            Alert.alert(
+                              "Attention",
+                              "The question cannot be saved because, One option should be True in Single Best Answer"
+                            );
+                          } else if (
+                            typeof formik?.errors?.answers === "string"
+                          ) {
+                            Alert.alert(
+                              "Attention",
+                              "The question cannot be saved because, the number of options should be at least 3 but not more than 5"
+                            );
+                          } else {
+                            formik.handleSubmit();
+                          }
+
+                          // console.log(formik.errors);
+                          // console.log(sbaError);
+                        }}
                         title="Save Question"
                         disabled={
                           formik.isSubmitting ||
-                          !formik.isValid ||
-                          !formik.dirty ||
-                          sbaError
-                            ? true
-                            : false
+                          //  !formik.isValid ||
+                          !formik.dirty
+                          // ||
+                          // sbaError
+                          //   ? true
+                          //   : false
                         }
                       />
                       <Button
+                        color="green"
                         onPress={() => deleteQuestion()}
                         title="Delete Question"
                       />

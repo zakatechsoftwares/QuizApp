@@ -22,6 +22,7 @@ import {
   setCurrentGroupName,
   setRunAppUseEffect,
   setOpenGroupList,
+  setQuestionCategory,
 } from "../redux/userSlice";
 
 const UserMode = () => {
@@ -224,9 +225,29 @@ const UserMode = () => {
                           <TouchableOpacity
                             activeOpacity={0.2}
                             onPress={() => {
+                              const quizGroupId = element.name.substring(
+                                0,
+                                element.name.indexOf("-")
+                              );
                               dispatch(setCurrentGroupCadre(element.cadre));
                               dispatch(setCurrentGroupName(element.name));
                               dispatch(setRunAppUseEffect());
+                              if (element.cadre !== "Candidate") {
+                                (() => {
+                                  firestore()
+                                    .collection("users")
+                                    .doc(quizGroupId)
+                                    .get()
+                                    .then((data) => {
+                                      const questionCategory =
+                                        data.data()[element.name]
+                                          .questionCategory;
+                                      dispatch(
+                                        setQuestionCategory(questionCategory)
+                                      );
+                                    });
+                                })();
+                              }
                             }}
                             style={{
                               height: 40,

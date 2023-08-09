@@ -25,6 +25,7 @@ const initialState = {
   dbUserDateJoined: null,
   dbUserExempted: null,
   openGroupList: false,
+  questionCategory: null,
 };
 
 const fetchUser = createAsyncThunk("DbUser/fetchUser", async (userId) => {
@@ -109,6 +110,9 @@ const userSlice = createSlice({
     setOpenGroupList: (state, action) => {
       state.openGroupList = action.payload;
     },
+    setQuestionCategory: (state, action) => {
+      state.questionCategory = action.payload;
+    },
   },
   // extraReducers: (builder) => {
   //   builder
@@ -151,6 +155,7 @@ export const {
   setOpenGroupList,
   setDbUserExempted,
   setDbUserDateJoined,
+  setQuestionCategory,
 } = userSlice.actions;
 //export { fetchUser };
 export default store;

@@ -5,6 +5,7 @@ import {
   TextInput,
   Button,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { FieldArray, Formik, ErrorMessage } from "formik";
@@ -24,7 +25,8 @@ const CreateQuestion = ({ navigation, route }) => {
   const [answersLength, setAnswersLength] = useState();
   const isMounted = useRef(false);
   const [sbaError, setSbaError] = useState(false);
-
+  const [questionType, setQuestionType] = useState("");
+  let questionCategory = useSelector((state) => state.user).questionCategory;
   let currentGroupName = useSelector((state) => state.user).currentGroupName;
   const quizGroupNameRaw = currentGroupName;
   const quizGroupName = quizGroupNameRaw.substring(
@@ -60,7 +62,7 @@ const CreateQuestion = ({ navigation, route }) => {
     questionId: Math.random().toString(36).substring(2, 12),
     author: userEmail,
 
-    subject: "Course",
+    subject: "",
     questionType: "",
     question: "",
     answers: [
@@ -92,8 +94,22 @@ const CreateQuestion = ({ navigation, route }) => {
           is_correct: yup.boolean(),
         })
       )
-      .min(4, "Options should be 4 or 5")
-      .max(5, "Options should be 4 or 5"),
+      .min(3, "The number of options should be 3 to 5")
+      .max(5, "The number of options should be 3 to 5"),
+    // .test({
+    //   name: "is_correct",
+    //   //  exclusive: true,
+    //   message: "Only one item must be marked as correct",
+    //   test: function (value) {
+    //     if (questionType === "Single Best Answer") {
+    //       const correctCount = value?.answers?.filter(
+    //         (item) => item.is_correct === "True"
+    //       ).length;
+    //       return false; //correctCount === 1;
+    //     }
+    //     return false; //true; // For other question types, this validation rule does not apply
+    //   },
+    // }),
   });
 
   const validate = (values) => {
@@ -108,16 +124,18 @@ const CreateQuestion = ({ navigation, route }) => {
     }
   };
 
-  let subject = Array.from(Array(100).keys());
-  subject.shift();
-  subject = subject.map((element) => ({
-    label: `Course-${element}`,
-    key: `Course-${element}`,
-  }));
+  // let subject = Array.from(Array(100).keys());
+  // subject.shift();
+  subject = Array.isArray(questionCategory)
+    ? questionCategory.map((element) => ({
+        key: element,
+        value: element,
+      }))
+    : [{ key: "Not specified", value: "Not specified" }];
 
   const questionTypes = [
-    { key: "Single Best Answer", label: "Single Best Answer" },
-    { key: "Multiple Choice", label: "Multiple Choice" },
+    { key: "Single Best Answer", value: "Single Best Answer" },
+    { key: "Multiple Choice", value: "Multiple Choice" },
   ];
 
   const onSubmit = async (values) => {
@@ -185,29 +203,32 @@ const CreateQuestion = ({ navigation, route }) => {
                     editable={false}
                   />
 
-                  <ModalSelector
+                  <SelectList
                     data={subject}
-                    initValue={
-                      formik.values.subject
-                        ? formik.values.subject
-                        : "Select the Course"
+                    setSelected={(option) =>
+                      formik.setFieldValue("subject", option)
                     }
-                    onChange={(option) =>
-                      formik.setFieldValue("subject", option.label)
-                    }
+                    save="value"
+                    placeholder="Question Category as categorized by the Chief"
+                    search={false}
                   />
+                  <Text style={{ color: "red" }}>
+                    <ErrorMessage name="subject" />
+                  </Text>
 
-                  <ModalSelector
+                  <SelectList
                     data={questionTypes}
-                    initValue={
-                      formik.values.questionType
-                        ? formik.values.questionType
-                        : "Select Question Type"
-                    }
-                    onChange={(option) =>
-                      formik.setFieldValue("questionType", option.label)
-                    }
+                    setSelected={(option) => {
+                      formik.setFieldValue("questionType", option);
+                      setQuestionType(option);
+                    }}
+                    save="value"
+                    placeholder="SBA or MCQ"
+                    search={false}
                   />
+                  <Text style={{ color: "red" }}>
+                    <ErrorMessage name="questionType" />
+                  </Text>
 
                   <UploadFiles
                     setFieldValue={formik.setFieldValue}
@@ -237,7 +258,7 @@ const CreateQuestion = ({ navigation, route }) => {
                     placeholder="Enter the Question"
                     multiline
                   />
-                  <Text>
+                  <Text style={{ color: "red" }}>
                     <ErrorMessage name="question" />
                   </Text>
                   {
@@ -326,6 +347,7 @@ const CreateQuestion = ({ navigation, route }) => {
                                     {index === 0
                                       ? answers.length < 5 && (
                                           <Button
+                                            color="green"
                                             height={10}
                                             width={100}
                                             title="+"
@@ -335,6 +357,7 @@ const CreateQuestion = ({ navigation, route }) => {
                                       : null}
                                     {index > 0 && (
                                       <Button
+                                        color="green"
                                         title="-"
                                         onPress={() => {
                                           removeAnswer(answerId);
@@ -342,7 +365,7 @@ const CreateQuestion = ({ navigation, route }) => {
                                         }}
                                       />
                                     )}
-                                    <Text>
+                                    <Text style={{ color: "red" }}>
                                       <ErrorMessage
                                         name={`answers[${index}].answer`}
                                       />
@@ -366,17 +389,40 @@ const CreateQuestion = ({ navigation, route }) => {
                     multiline
                     textAlignVertical="top"
                   />
+                  <Text style={{ color: "red" }}>
+                    <ErrorMessage name="answerExplanation" />
+                  </Text>
+
                   {/* onSubmit was not reponding to call when 'handleSubmit' was used, i therefore resorted to using the onSubmit call directly */}
                   <Button
-                    onPress={() => formik.handleSubmit()}
+                    color="green"
+                    onPress={() => {
+                      if (sbaError) {
+                        Alert.alert(
+                          "Attention",
+                          "The question cannot be saved because, One option should be True in Single Best Answer"
+                        );
+                      } else if (typeof formik?.errors?.answers === "string") {
+                        Alert.alert(
+                          "Attention",
+                          "The question cannot be saved because, the number of options should be at least 3 but not more than 5"
+                        );
+                      } else {
+                        formik.handleSubmit();
+                      }
+
+                      // console.log(formik.errors);
+                      // console.log(sbaError);
+                    }}
                     title="Save Question"
                     disabled={
                       formik.isSubmitting ||
-                      !formik.isValid ||
-                      !formik.dirty ||
-                      sbaError
-                        ? true
-                        : false
+                      //  !formik.isValid ||
+                      !formik.dirty
+                      // ||
+                      // sbaError
+                      //   ? true
+                      //   : false
                     }
                   />
                 </View>

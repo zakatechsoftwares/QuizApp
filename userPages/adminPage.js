@@ -256,12 +256,12 @@ Do NOT share the key as it can be used only once:${arg}`,
               data: attemptedQuiz,
             },
           ]}
-          refreshing={refreshing}
-          onRefresh={() => {
-            setRefreshing(true);
-            setRunUseEffect(!runUseEffect);
-            setShow(true);
-          }}
+          // refreshing={refreshing}
+          // onRefresh={() => {
+          //   // setRefreshing(true);
+          //   setRunUseEffect(!runUseEffect);
+          //   setShow(true);
+          // }}
           renderSectionHeader={({ section }) => (
             <Text style={styles.SectionHeaderStyle}> {section.title} </Text>
           )}

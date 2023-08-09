@@ -1,6 +1,5 @@
 import {
   Button,
-  FlatList,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -12,11 +11,13 @@ import {
   Platform,
   Image,
   TextInput,
+  FlatList,
 } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { Text } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useSelector } from "react-redux";
+//import { FlashList } from "@shopify/flash-list";
 
 const ChooseQuizQuestion = ({ navigation, route }) => {
   let dbUser = JSON.parse(useSelector((state) => state.user).DbUser);
@@ -169,6 +170,7 @@ const ChooseQuizQuestion = ({ navigation, route }) => {
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.inner}>
               <Button
+                color="green"
                 title="Create the Quiz"
                 onPress={() => submitQuiz()}
                 // disabled={
@@ -184,6 +186,7 @@ const ChooseQuizQuestion = ({ navigation, route }) => {
                 {questions.length} questions
               </Text>
               <FlatList
+                estimatedItemSize={200}
                 data={questions}
                 keyExtractor={(item) => item.questionId}
                 ListHeaderComponent={
@@ -267,6 +270,9 @@ const ChooseQuizQuestion = ({ navigation, route }) => {
                         borderColor: "green",
                         borderWidth: 1,
                         padding: 5,
+                        opacity: selectedQuestionId.includes(item.questionId)
+                          ? 0.5
+                          : 1,
                         backgroundColor: selectedQuestionId.includes(
                           item.questionId
                         )

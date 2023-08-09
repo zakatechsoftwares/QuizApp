@@ -10,6 +10,8 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  PanResponder,
+  TextInput,
 } from "react-native";
 
 import SigninPage from "./signinPage";
@@ -57,6 +59,7 @@ import {
   AdEventType,
 } from "react-native-google-mobile-ads";
 import messaging from "@react-native-firebase/messaging";
+import * as Updates from "expo-updates";
 
 const adUnitIdBanner = __DEV__
   ? TestIds.BANNER
@@ -101,6 +104,10 @@ function App() {
   const groupName = quizGroupNameRaw.substring(
     quizGroupNameRaw.indexOf("-") + 1
   );
+  const quizGroupName = quizGroupNameRaw.substring(
+    0,
+    quizGroupNameRaw.indexOf("-")
+  );
 
   async function requestUserPermission() {
     const authStatus = await messaging().requestPermission();
@@ -112,6 +119,21 @@ function App() {
       console.log("Authorization status:", authStatus);
     }
   }
+
+  const eventListener = async (event) => {
+    if (event.type === Updates.UpdateEventType.ERROR) {
+      // Handle error
+      return null;
+    } else if (event.type === Updates.UpdateEventType.NO_UPDATE_AVAILABLE) {
+      // Handle no update available
+      return null;
+    } else if (event.type === Updates.UpdateEventType.UPDATE_AVAILABLE) {
+      // Handle update available
+      await Updates.fetchUpdateAsync();
+      await Updates.reloadAsync();
+    }
+  };
+  Updates.useUpdateEvents(eventListener);
 
   useEffect(() => {
     messaging().onNotificationOpenedApp((remoteMessage) => {
@@ -579,6 +601,7 @@ function App() {
             {dbUserFirstName && (
               <View style={{ width: "100%", textAlign: "center" }}>
                 <Button
+                  color="green"
                   title={
                     groupName
                       ? "Change the Current Quiz Group"
@@ -590,11 +613,6 @@ function App() {
                     dispatch(setRunAppUseEffect(!runAppUseEffect));
                   }}
                 />
-                {/* <TouchableOpacity>
-                  <Text style={{ fontSize: 20, textAlign: "center" }}>
-                    Change the Current Quiz Group
-                  </Text>
-                </TouchableOpacity> */}
               </View>
             )}
           </View>
@@ -606,6 +624,9 @@ function App() {
             swipeEnabled: false,
           }}
           drawerContent={(props) => {
+            let [showQuestionCategory, setShowQuestionCategory] =
+              useState(false);
+            let [questionCategory, setQuestionCategory] = useState("");
             const filteredProps = {
               ...props,
               state: {
@@ -659,6 +680,54 @@ function App() {
                         screen: "Question Bank",
                       })
                     }
+                  />
+                )}
+                {showQuestionCategory && (
+                  <TextInput
+                    onChangeText={setQuestionCategory}
+                    value={questionCategory}
+                    style={styles.input}
+                    placeholder="Add Question Category to be used"
+                    //  //  validate={prop.validatefield}
+                  />
+                )}
+                {(currentGroupCadre === "Admin" ||
+                  currentGroupCadre === "Chief Examiner") && (
+                  <DrawerItem
+                    label={
+                      showQuestionCategory
+                        ? questionCategory
+                          ? "Add"
+                          : "Hide Text field"
+                        : "Add Question Category"
+                    }
+                    onPress={() => {
+                      if (showQuestionCategory === false) {
+                        setShowQuestionCategory(true);
+                      } else {
+                        if (questionCategory) {
+                          (async () => {
+                            await firestore()
+                              .collection("users")
+                              .doc(quizGroupName)
+                              .update({
+                                [`${quizGroupNameRaw}.questionCategory`]:
+                                  firestore.FieldValue.arrayUnion(
+                                    questionCategory
+                                  ),
+                              })
+                              .then(() => {
+                                setShowQuestionCategory(false);
+                                Alert.alert(
+                                  "Question Category added successfully"
+                                );
+                              });
+                          })();
+                        } else {
+                          setShowQuestionCategory(false);
+                        }
+                      }
+                    }}
                   />
                 )}
 
@@ -853,6 +922,13 @@ export default () => {
 };
 
 const styles = StyleSheet.create({
+  input: {
+    borderWidth: 2,
+    width: "90%",
+    margin: 4,
+    paddingHorizontal: 16,
+    fontSize: 16,
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",

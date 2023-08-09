@@ -167,11 +167,11 @@ const CandidatePage = ({ navigation }) => {
             data: attemptedQuiz,
           },
         ]}
-        refreshing={refreshing}
-        onRefresh={() => {
-          setRefreshing(true);
-          setRunUseEffect(!runUseEffect);
-        }}
+        //refreshing={refreshing}
+        // onRefresh={() => {
+        //   //  setRefreshing(true);
+        //   setRunUseEffect(!runUseEffect);
+        // }}
         renderSectionHeader={({ section }) => (
           <Text style={styles.SectionHeaderStyle}> {section.title} </Text>
         )}

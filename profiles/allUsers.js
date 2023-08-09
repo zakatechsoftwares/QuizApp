@@ -8,13 +8,13 @@ import {
   Keyboard,
   Platform,
   Alert,
-  FlatList,
 } from "react-native";
 import { useCallback, useEffect, useState, useContext } from "react";
 //import { useFocusEffect } from "@react-navigation/native";
 import { Text } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useSelector } from "react-redux";
+import { FlashList } from "@shopify/flash-list";
 
 const AllUsers = ({ navigation, route }) => {
   let dbUser = JSON.parse(useSelector((state) => state.user).DbUser);
@@ -205,7 +205,8 @@ const AllUsers = ({ navigation, route }) => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.inner}>
-            <FlatList
+            <FlashList
+              estimatedItemSize={200}
               data={users}
               renderItem={({ item }) => {
                 return (
@@ -299,7 +300,6 @@ const AllUsers = ({ navigation, route }) => {
                   </View>
                 );
               }}
-              estimatedItemSize={200}
             />
           </View>
         </TouchableWithoutFeedback>

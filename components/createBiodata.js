@@ -110,6 +110,7 @@ const CreateBiodata = (prop) => {
 
       <View style={{ width: "100%" }}>
         <Button
+          color="green"
           title={prop.value.dateOfBirth || "Choose your date of birth"}
           onPress={() => setShow(true)}
         />
