@@ -40,8 +40,8 @@ export default function CreateProfile({ navigation }) {
   const validationSchema = yup.object().shape({
     firstName: yup.string().required("This field is required"),
     lastName: yup.string().required("This field is required"),
-    dateOfBirth: yup.string().required("Date of birth is required"),
-    sex: yup.string().required("This field is required"),
+    // dateOfBirth: yup.string().required("Date of birth is required"),
+    // sex: yup.string().required("This field is required"),
   });
 
   const onSubmit = async (values) => {
