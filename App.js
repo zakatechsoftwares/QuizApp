@@ -527,6 +527,8 @@ function App() {
     }
   }, [dbUserFirstName]);
 
+  console.log("dateJoined" + dbUserDateJoined);
+
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged((credentials) => {
       if (credentials) {
@@ -664,7 +666,7 @@ function App() {
               flexDirection: "row",
             }}
           >
-            {dbUserFirstName && (
+            {dbUserDateJoined && (
               <View style={{ width: "100%", textAlign: "center" }}>
                 <Button
                   color="green"

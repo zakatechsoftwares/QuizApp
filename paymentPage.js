@@ -103,11 +103,11 @@ const PaymentPage = () => {
         }}
         options={{
           tx_ref: generateTransactionRef(10),
-          authorization: "FLWPUBK_TEST-e4bb46908aa02f101fc0420306b1bc17-X", //"FLWPUBK-99f8982cc3147c237e55b3ff84f2d124-X", //FLTWAVE_KEY,
+          authorization: "FLWPUBK-0f632bce880c01df23830ca1aa857073-X", //"FLWPUBK-99f8982cc3147c237e55b3ff84f2d124-X", //FLTWAVE_KEY,
           customer: {
             email: dbUser?.email,
           },
-          amount: country.countryName === "Nigeria" ? 2000 : 5,
+          amount: country.countryName === "Nigeria" ? 2500 : 5,
           currency: country.countryName === "Nigeria" ? "NGN" : "USD",
           payment_options: "card",
         }}

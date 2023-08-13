@@ -16,17 +16,18 @@ import { useSelector } from "react-redux";
 const Stack = createNativeStackNavigator();
 
 const StackProfilePage = ({ navigation }) => {
-  let dbUserFirstName = useSelector((state) => state.user).dbUserFirstName;
+  let dbUserDateJoined = useSelector((state) => state.user).dbUserDateJoined;
   let userCurrentGroupCadre = useSelector(
     (state) => state.user
   ).currentGroupCadre;
   let paymentStatus = useSelector((state) => state.user).paymentStatus;
 
-  dbUserFirstName = dbUserFirstName ? true : false;
+  dbUserDateJoined = dbUserDateJoined ? true : false;
+
   return (
     <Stack.Navigator //initialRouteName='Profile'
     >
-      {dbUserFirstName &&
+      {dbUserDateJoined &&
         userCurrentGroupCadre && ( //paymentStatus &&
           <Stack.Screen
             name="Profile"
@@ -35,7 +36,7 @@ const StackProfilePage = ({ navigation }) => {
           />
         )}
 
-      {dbUserFirstName &&
+      {dbUserDateJoined &&
         userCurrentGroupCadre && ( //paymentStatus &&
           <Stack.Screen
             name="Chat"
@@ -43,30 +44,30 @@ const StackProfilePage = ({ navigation }) => {
             options={{ title: "Chat Room", headerShown: true }}
           />
         )}
-      {dbUserFirstName &&
+      {dbUserDateJoined &&
         userCurrentGroupCadre === "Candidate" &&
         paymentStatus && (
           <Stack.Screen name="Review Attempts" component={ReviewAttempts} />
         )}
 
-      {dbUserFirstName || (
+      {/* {dbUserDateJoined || (
         <Stack.Screen name="Create Profile" component={CreateProfile} />
-      )}
-      {dbUserFirstName && userCurrentGroupCadre === null && (
+      )} */}
+      {dbUserDateJoined && userCurrentGroupCadre === null && (
         //userCurrentGroupCadre===null &&
         //paymentStatus &&
         <Stack.Screen name="User Mode" component={UserMode} />
       )}
       {/* 
-      {dbUserFirstName && ( //paymentStatus &&
+      {dbUserDateJoined && ( //paymentStatus &&
         <Stack.Screen name="Edit Profile" component={EditProfile} />
       )} */}
 
-      {dbUserFirstName &&
+      {dbUserDateJoined &&
         userCurrentGroupCadre === "Admin" && ( //paymentStatus &&
           <Stack.Screen name="All Users" component={AllUsers} />
         )}
-      {dbUserFirstName &&
+      {dbUserDateJoined &&
         userCurrentGroupCadre === "Candidate" &&
         paymentStatus && (
           <Stack.Screen
@@ -95,7 +96,7 @@ const StackProfilePage = ({ navigation }) => {
       />
       {
         //paymentStatus === false &&
-        dbUserFirstName ? ( //paymentStatus &&
+        dbUserDateJoined ? ( //paymentStatus &&
           <Stack.Screen name="Payment" component={PaymentPage} />
         ) : null
       }
