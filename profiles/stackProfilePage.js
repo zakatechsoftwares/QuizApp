@@ -23,6 +23,7 @@ const StackProfilePage = ({ navigation }) => {
   let paymentStatus = useSelector((state) => state.user).paymentStatus;
 
   dbUserDateJoined = dbUserDateJoined ? true : false;
+  console.log("dateJoined " + dbUserDateJoined);
 
   return (
     <Stack.Navigator //initialRouteName='Profile'
@@ -53,7 +54,7 @@ const StackProfilePage = ({ navigation }) => {
       {/* {dbUserDateJoined || (
         <Stack.Screen name="Create Profile" component={CreateProfile} />
       )} */}
-      {dbUserDateJoined && userCurrentGroupCadre === null && (
+      {dbUserDateJoined != null && ( //&& userCurrentGroupCadre === null
         //userCurrentGroupCadre===null &&
         //paymentStatus &&
         <Stack.Screen name="User Mode" component={UserMode} />

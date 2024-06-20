@@ -37,6 +37,7 @@ import {
   setOpenGroupList,
   setDbUserDateJoined,
   setDbUserExempted,
+  setShowAdvert,
 } from "./redux/userSlice";
 import { NavigationContainer } from "@react-navigation/native";
 import {
@@ -86,7 +87,7 @@ const Drawer = createDrawerNavigator();
 function App() {
   const dispatch = useDispatch();
   const isMounted = useRef(false);
-  let [showAdvert, setShowAdvert] = useState(false);
+
   let dbUserFirstName = useSelector((state) => state.user).dbUserFirstName;
   let dbUserLastName = useSelector((state) => state.user).dbUserLastName;
   let dbUserMiddleName = useSelector((state) => state.user).dbUserMiddleName;
@@ -102,6 +103,7 @@ function App() {
   let runAppUseEffect = useSelector((state) => state.user).runAppUseEffect;
   let emailVerified = useSelector((state) => state.user).emailVerified;
   let loading = useSelector((state) => state.user).loading;
+  let showAdvert = useSelector((state) => state.user).showAdvert;
 
   const quizGroupNameRaw = currentGroupName || "";
   const groupName = quizGroupNameRaw.substring(
@@ -527,8 +529,6 @@ function App() {
     }
   }, [dbUserFirstName]);
 
-  console.log("dateJoined" + dbUserDateJoined);
-
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged((credentials) => {
       if (credentials) {
@@ -572,6 +572,7 @@ function App() {
 
                     paid = data2 || data1 || data3 ? true : false;
                     let data4 = data1 ? false : true;
+
                     setShowAdvert(data4);
                     dispatch(setLoading(false));
                     dispatch(setDbUser(JSON.stringify(user)));
@@ -583,6 +584,14 @@ function App() {
                     dispatch(setDbUserExempted(user.exempted));
                   } else {
                     dispatch(setLoading(false));
+                    dispatch(setShowAdvert(true));
+
+                    dispatch(setLoading(false));
+                    dispatch(setDbUser(JSON.stringify(credentials.user)));
+                    dispatch(setDbUserFirstName(credentials.user.displayName));
+
+                    dispatch(setPaymentStatus(false));
+                    dispatch(setDbUserDateJoined(Date.now()));
                   }
                 })
                 .catch((err) => {
@@ -595,7 +604,7 @@ function App() {
               // return data;
             } catch (error) {
               // Alert.alert("Error fetching user:", error);
-              console.log(error.message);
+              error.message;
               dispatch(setLoading(false));
             }
           })();
@@ -606,7 +615,7 @@ function App() {
         //dispatch(setCurrentGroupCadre(null));
         dispatch(setCurrentGroupCadre(null));
         dispatch(setCurrentGroupName(null));
-        dispatch(setDbUser(null));
+        dispatch(setDbUser(JSON.stringify(credentials)));
         dispatch(setUserEmail(null));
         dispatch(setEmailVerified(false));
         dispatch(setDbUserFirstName(null));

@@ -40,8 +40,10 @@ const AttemptQuiz = ({ navigation, route }) => {
   const [quixName, setQuixName] = useState("");
   const [quiz, setQuiz] = useState([]);
   const [response, setResponse] = useState([]);
-  const [hour, setHour] = useState(quiz !== [] ? quiz.timeAllowedHr : 0);
-  const [minute, setMinute] = useState(quiz !== [] ? quiz.timeAllowedMin : 0);
+  const [hour, setHour] = useState(quiz.length > 0 ? quiz.timeAllowedHr : 0);
+  const [minute, setMinute] = useState(
+    quiz.length > 0 ? quiz.timeAllowedMin : 0
+  );
   const [second, setSecond] = useState(0);
   const [timer, setTimer] = useState(1);
   const [clock, setClock] = useState("");

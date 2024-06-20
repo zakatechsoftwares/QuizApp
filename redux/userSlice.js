@@ -26,6 +26,7 @@ const initialState = {
   dbUserExempted: null,
   openGroupList: false,
   questionCategory: null,
+  showAdvert: false,
 };
 
 const fetchUser = createAsyncThunk("DbUser/fetchUser", async (userId) => {
@@ -102,7 +103,7 @@ const userSlice = createSlice({
       state.dbUserMiddleName = action.payload;
     },
     setDbUserDateJoined: (state, action) => {
-      state.setDbUserDateJoined = action.payload;
+      state.dbUserDateJoined = action.payload;
     },
     setDbUserExempted: (state, action) => {
       state.setDbUserExempted = action.payload;
@@ -112,6 +113,9 @@ const userSlice = createSlice({
     },
     setQuestionCategory: (state, action) => {
       state.questionCategory = action.payload;
+    },
+    setShowAdvert: (state, action) => {
+      state.showAdvert = action.payload;
     },
   },
   // extraReducers: (builder) => {
@@ -156,6 +160,7 @@ export const {
   setDbUserExempted,
   setDbUserDateJoined,
   setQuestionCategory,
+  setShowAdvert,
 } = userSlice.actions;
 //export { fetchUser };
 export default store;

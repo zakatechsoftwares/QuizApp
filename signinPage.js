@@ -19,7 +19,7 @@ import {
   GoogleSignin,
   GoogleSigninButton,
 } from "@react-native-google-signin/google-signin";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setEmailVerified,
   fetchUser,
@@ -33,6 +33,8 @@ import {
   setDbUserMiddleName,
   setDbUserDateJoined,
   setDbUserExempted,
+  setRunAppUseEffect,
+  setShowAdvert,
 } from "./redux/userSlice";
 import firestore from "@react-native-firebase/firestore";
 import {
@@ -50,6 +52,7 @@ const SigninPage = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [initializing, setInitializing] = useState(true);
   const [show, setShow] = useState(false);
+  const runAppUseEffect = useSelector((state) => state.user).runAppUseEffect;
 
   async function onAppleButtonPress() {
     // Start the sign-in request
@@ -73,6 +76,92 @@ const SigninPage = ({ navigation }) => {
     // Sign the user in with the credential
     return auth().signInWithCredential(appleCredential);
   }
+
+  const FindOrRegisterDbUser = (credentials) => {
+    (async () => {
+      try {
+        firestore()
+          .collection("users")
+          .doc(credentials.user.uid)
+          .get()
+          .then((userDoc) => {
+            if (userDoc.exists) {
+              const user = userDoc.data();
+              let paid = false;
+
+              let data1 =
+                user && Array.isArray(user.payments) && user.payments.length > 0
+                  ? user?.payments[user?.payments?.length - 1]?.nextDueDate >
+                    Date.now()
+                  : false;
+
+              let data2 = user?.exempted ?? false;
+              let data3 =
+                user !== undefined && user?.dateJoined !== undefined
+                  ? Date.now() - user?.dateJoined ?? Date.now() < 7 * 86400000
+                  : false;
+
+              paid = data2 || data1 || data3 ? true : false;
+
+              // dispatch(setLoading(false));
+              // dispatch(setEmailVerified(credentials.user.emailVerified));
+              // //dispatch(fetchUser(credentials.uid));
+              // dispatch(setUserEmail(credentials.user.email));
+              // dispatch(setDbUser(JSON.stringify(user)));
+              // dispatch(setDbUserFirstName(user.firstName));
+              // dispatch(setDbUserLastName(user.lastName));
+              // dispatch(setDbUserMiddleName(user.middleNameName));
+              // setInitializing(false);
+              // dispatch(setUserId(credentials.user.uid));
+              // dispatch(setPaymentStatus(paid));
+              // dispatch(setDbUserDateJoined(user.dateJoined));
+              // dispatch(setDbUserExempted(user.exempted));
+              dispatch(setRunAppUseEffect(!runAppUseEffect));
+            } else {
+              try {
+                firestore()
+                  .collection("users")
+                  .doc(credentials.user.uid)
+                  .set({
+                    userId: credentials.user.uid,
+                    firstName: credentials.user.displayName,
+                    email: credentials.user.email,
+                    exempted: false,
+                    dateJoined: Date.now(),
+                    groupMembership: [],
+                    payments: [],
+                  })
+                  .then((arg) => {
+                    dispatch(setRunAppUseEffect(!runAppUseEffect));
+                    // dispatch(setShowAdvert(true));
+                    // dispatch(setLoading(false));
+                    // dispatch(setDbUser(JSON.stringify(credentials.user)));
+                    // dispatch(setDbUserFirstName(credentials.user.displayName));
+
+                    // dispatch(setPaymentStatus(false));
+                    // dispatch(setDbUserDateJoined(Date.now()));
+                    // dispatch(setDbUserExempted(false));
+                  });
+              } catch (e) {
+                Alert.alert(e.message);
+              }
+            }
+          })
+          .catch((err) => {
+            dispatch(setLoading(false));
+            "dbUser could not be found" + err.message;
+          });
+
+        // let data = JSON.stringify({ user, paid });
+
+        // return data;
+      } catch (error) {
+        // Alert.alert("Error fetching user:", error);
+        throw error?.message;
+        dispatch(setLoading(false));
+      }
+    })();
+  };
 
   async function onGoogleButtonPress() {
     dispatch(setLoading(true));
@@ -108,87 +197,7 @@ const SigninPage = ({ navigation }) => {
       auth()
         .signInWithEmailAndPassword(email, password)
         .then((credentials) => {
-          // dispatch(setLoading(false));
-          // dispatch(setUserEmail(credentials.user.email));
-          // dispatch(setUserId(credentials.user.uid));
-          // dispatch(setEmailVerified(credentials.user.emailVerified));
-          // dispatch(fetchUser(credentials.user.uid));
-          // Alert.alert("you are signed in with email and password");
-          (async () => {
-            try {
-              firestore()
-                .collection("users")
-                .doc(credentials.uid)
-                .get()
-                .then((userDoc) => {
-                  if (userDoc.exists) {
-                    const user = userDoc.data();
-                    let paid = false;
-
-                    let data1 =
-                      user &&
-                      Array.isArray(user.payments) &&
-                      user.payments.length > 0
-                        ? user?.payments[user?.payments?.length - 1]
-                            ?.nextDueDate > Date.now()
-                        : false;
-
-                    let data2 = user?.exempted ?? false;
-                    let data3 =
-                      user !== undefined && user?.dateJoined !== undefined
-                        ? Date.now() - user?.dateJoined ??
-                          Date.now() < 7 * 86400000
-                        : false;
-
-                    paid = data2 || data1 || data3 ? true : false;
-
-                    dispatch(setLoading(false));
-                    dispatch(setEmailVerified(credentials.user.emailVerified));
-                    //dispatch(fetchUser(credentials.uid));
-                    dispatch(setUserEmail(credentials.user.email));
-                    dispatch(setDbUser(JSON.stringify(user)));
-                    dispatch(setDbUserFirstName(user.firstName));
-                    dispatch(setDbUserLastName(user.lastName));
-                    dispatch(setDbUserMiddleName(user.middleNameName));
-                    dispatch(setDbUserDateJoined(user.dateJoined));
-                    dispatch(setDbUserExempted(user.exempted));
-
-                    dispatch(setUserId(credentials.user.uid));
-                    dispatch(setPaymentStatus(paid));
-                    setInitializing(false);
-                    Alert.alert(user.email);
-                  } else {
-                    try {
-                      firestore()
-                        .collection("users")
-                        .doc(userId)
-                        .set({
-                          userId: credentials.user.uid,
-                          firstName: credentials.user.displayName,
-                          email: credentials.user.email,
-                          exempted: false,
-                          dateJoined: Date.now(),
-                          groupMembership: [],
-                          payments: [],
-                        })
-                        .then(dispatch(setRunAppUseEffect()));
-                    } catch (e) {
-                      Alert.alert(e.message);
-                    }
-                  }
-                })
-                .catch((err) => {
-                  "dbUser could not be found" + err.message;
-                });
-
-              // let data = JSON.stringify({ user, paid });
-
-              // return data;
-            } catch (error) {
-              // Alert.alert("Error fetching user:", error);
-              throw error?.message;
-            }
-          })();
+          FindOrRegisterDbUser(credentials);
         })
         .catch((error) => {
           dispatch(setLoading(false));
@@ -287,91 +296,7 @@ const SigninPage = ({ navigation }) => {
             onPress={() => {
               onGoogleButtonPress()
                 .then((credentials) => {
-                  // dispatch(setUserEmail(credentials.user.email));
-                  // dispatch(setUserId(credentials.user.uid));
-                  // dispatch(setEmailVerified(credentials.user.emailVerified));
-                  // dispatch(fetchUser(credentials.user.uid));
-                  // dispatch(setLoading(false));
-                  // Alert.alert("you are now signed in with google button");
-                  (async () => {
-                    try {
-                      firestore()
-                        .collection("users")
-                        .doc(credentials.user.uid)
-                        .get()
-                        .then((userDoc) => {
-                          if (userDoc.exists) {
-                            const user = userDoc.data();
-
-                            let paid = false;
-
-                            let data1 =
-                              user &&
-                              Array.isArray(user.payments) &&
-                              user.payments.length > 0
-                                ? user?.payments[user?.payments?.length - 1]
-                                    ?.nextDueDate > Date.now()
-                                : false;
-
-                            let data2 = user?.exempted ?? false;
-                            let data3 =
-                              user !== undefined &&
-                              user?.dateJoined !== undefined
-                                ? Date.now() - user?.dateJoined ??
-                                  Date.now() < 7 * 86400000
-                                : false;
-
-                            paid = data2 || data1 || data3 ? true : false;
-
-                            dispatch(setLoading(false));
-                            dispatch(
-                              setEmailVerified(credentials.user.emailVerified)
-                            );
-                            //dispatch(fetchUser(credentials.uid));
-                            dispatch(setUserEmail(credentials.user.email));
-                            dispatch(setDbUser(JSON.stringify(user)));
-                            dispatch(setDbUserFirstName(user.firstName));
-                            dispatch(setDbUserLastName(user.lastName));
-                            dispatch(setDbUserMiddleName(user.middleNameName));
-                            setInitializing(false);
-                            dispatch(setUserId(credentials.user.uid));
-                            dispatch(setPaymentStatus(paid));
-                            dispatch(setDbUserDateJoined(user.dateJoined));
-                            dispatch(setDbUserExempted(user.exempted));
-                          } else {
-                            try {
-                              firestore()
-                                .collection("users")
-                                .doc(credentials.user.uid)
-                                .set({
-                                  userId: credentials.user.uid,
-                                  firstName: credentials.user.displayName,
-                                  email: credentials.user.email,
-                                  exempted: false,
-                                  dateJoined: Date.now(),
-                                  groupMembership: [],
-                                  payments: [],
-                                })
-                                .then(dispatch(setRunAppUseEffect()));
-                            } catch (e) {
-                              Alert.alert(e.message);
-                            }
-                          }
-                        })
-                        .catch((err) => {
-                          dispatch(setLoading(false));
-                          "dbUser could not be found" + err.message;
-                        });
-
-                      // let data = JSON.stringify({ user, paid });
-
-                      // return data;
-                    } catch (error) {
-                      // Alert.alert("Error fetching user:", error);
-                      throw error?.message;
-                      dispatch(setLoading(false));
-                    }
-                  })();
+                  FindOrRegisterDbUser(credentials);
                 })
                 .catch((error) => {
                   setInitializing(false);
@@ -392,92 +317,7 @@ const SigninPage = ({ navigation }) => {
               onPress={() => {
                 onAppleButtonPress()
                   .then((credentials) => {
-                    // dispatch(setUserEmail(credentials.user.email));
-                    // dispatch(setUserId(credentials.user.uid));
-                    // dispatch(setEmailVerified(credentials.user.emailVerified));
-                    // dispatch(fetchUser(credentials.user.uid));
-                    // dispatch(setLoading(false));
-                    // Alert.alert("you are now signed in with google button");
-                    console.log(credentials)(async () => {
-                      try {
-                        firestore()
-                          .collection("users")
-                          .doc(credentials.user.uid)
-                          .get()
-                          .then((userDoc) => {
-                            if (userDoc.exists) {
-                              const user = userDoc.data();
-                              let paid = false;
-
-                              let data1 =
-                                user &&
-                                Array.isArray(user.payments) &&
-                                user.payments.length > 0
-                                  ? user?.payments[user?.payments?.length - 1]
-                                      ?.nextDueDate > Date.now()
-                                  : false;
-
-                              let data2 = user?.exempted ?? false;
-                              let data3 =
-                                user !== undefined &&
-                                user?.dateJoined !== undefined
-                                  ? Date.now() - user?.dateJoined ??
-                                    Date.now() < 7 * 86400000
-                                  : false;
-
-                              paid = data2 || data1 || data3 ? true : false;
-
-                              dispatch(setLoading(false));
-                              dispatch(
-                                setEmailVerified(credentials.user.emailVerified)
-                              );
-                              //dispatch(fetchUser(credentials.uid));
-                              dispatch(setUserEmail(credentials.user.email));
-                              dispatch(setDbUser(JSON.stringify(user)));
-                              dispatch(setDbUserFirstName(user.firstName));
-                              dispatch(setDbUserLastName(user.lastName));
-                              dispatch(
-                                setDbUserMiddleName(user.middleNameName)
-                              );
-                              setInitializing(false);
-                              dispatch(setUserId(credentials.user.uid));
-                              dispatch(setPaymentStatus(paid));
-                              dispatch(setDbUserDateJoined(user.dateJoined));
-                              dispatch(setDbUserExempted(user.exempted));
-                            } else {
-                              try {
-                                firestore()
-                                  .collection("users")
-                                  .doc(credentials.user.uid)
-                                  .set({
-                                    userId: credentials.user.uid,
-                                    firstName: credentials.user.displayName,
-                                    email: credentials.user.email,
-                                    exempted: false,
-                                    dateJoined: Date.now(),
-                                    groupMembership: [],
-                                    payments: [],
-                                  })
-                                  .then(dispatch(setRunAppUseEffect()));
-                              } catch (e) {
-                                Alert.alert(e.message);
-                              }
-                            }
-                          })
-                          .catch((err) => {
-                            dispatch(setLoading(false));
-                            "dbUser could not be found" + err.message;
-                          });
-
-                        // let data = JSON.stringify({ user, paid });
-
-                        // return data;
-                      } catch (error) {
-                        // Alert.alert("Error fetching user:", error);
-                        throw error?.message;
-                        dispatch(setLoading(false));
-                      }
-                    })();
+                    FindOrRegisterDbUser(credentials);
                   })
                   .catch((error) => {
                     setInitializing(false);
