@@ -96,7 +96,6 @@ const ChooseQuizQuestion = ({ navigation, route }) => {
     navigation.navigate("Create Quiz", { selectedQuestion: selectedQuestions });
 
     const difference = getDifference(selectedQuestions, questions);
-    console.log(difference);
   };
 
   useEffect(() => {

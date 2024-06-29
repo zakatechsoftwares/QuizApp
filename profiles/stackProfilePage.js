@@ -23,7 +23,7 @@ const StackProfilePage = ({ navigation }) => {
   let paymentStatus = useSelector((state) => state.user).paymentStatus;
 
   dbUserDateJoined = dbUserDateJoined ? true : false;
-  console.log("dateJoined " + dbUserDateJoined);
+  // console.log("dateJoined " + dbUserDateJoined);
 
   return (
     <Stack.Navigator //initialRouteName='Profile'

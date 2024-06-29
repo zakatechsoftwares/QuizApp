@@ -186,7 +186,7 @@ const CreateQuestion = ({ navigation, route }) => {
       const url = await storage()
         .ref(`QuizImages/${imageName}`)
         .getDownloadURL();
-      console.log(result);
+
       values.imageDownloadURL = url;
       await firestore()
         .collection("users")

@@ -276,7 +276,7 @@ const SigninPage = ({ navigation }) => {
             onPress={Login}
             style={styles.button}
           >
-            <Text style={styles.text}>Login</Text>
+            <Text style={styles.text}>Log in</Text>
             {/* <FontAwesome name="send" size={24} color="black"  style={styles.floatingButtonStyle} /> */}
           </TouchableOpacity>
 

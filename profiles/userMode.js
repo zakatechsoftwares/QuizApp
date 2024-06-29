@@ -29,10 +29,6 @@ const UserMode = () => {
   const dispatch = useDispatch();
   let dbUser = JSON.parse(useSelector((state) => state.user).DbUser);
 
-  console.log(
-    //JSON.parse(
-    dbUser //)
-  );
   let userId = useSelector((state) => state.user).userId;
   let openGroupList = useSelector((state) => state.user).openGroupList;
   let runAppUseEffect = useSelector((state) => state.user).runAppUseEffect;
@@ -212,7 +208,7 @@ const UserMode = () => {
                   style={[styles.touchableOpacityStyle]}
                 >
                   <Text style={styles.touchableText}>
-                    {openGroupList ? "CLOSE GROUP LIST" : "ENTER A QUIZ GROUP"}
+                    {openGroupList ? "CLOSE GROUP LIST" : "OPEN GROUP LIST"}
                   </Text>
                 </TouchableOpacity>
 

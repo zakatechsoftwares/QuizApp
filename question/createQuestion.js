@@ -20,6 +20,7 @@ import { useSelector } from "react-redux";
 
 const CreateQuestion = ({ navigation, route }) => {
   const { item } = route.params;
+  const [newCategory, setNewCategory] = useState("");
   const [itemAnswers, setItemAnswers] = useState(item ? item.answers : []);
   const [itemAnswersLength, setItemAnswersLength] = useState();
   const [answersLength, setAnswersLength] = useState();
@@ -202,19 +203,47 @@ const CreateQuestion = ({ navigation, route }) => {
                     style={styles.input}
                     editable={false}
                   />
-
-                  <SelectList
-                    data={subject}
-                    setSelected={(option) =>
-                      formik.setFieldValue("subject", option)
-                    }
-                    save="value"
-                    placeholder="Question Category as categorized by the Chief"
-                    search={false}
-                  />
-                  <Text style={{ color: "red" }}>
-                    <ErrorMessage name="subject" />
-                  </Text>
+                  <View style={{ flexDirection: "row", paddingEnd: 10 }}>
+                    <View>
+                      <SelectList
+                        data={subject}
+                        setSelected={(option) =>
+                          formik.setFieldValue("subject", option)
+                        }
+                        save="value"
+                        placeholder="Question category"
+                        search={false}
+                        style={[styles.input, { width: "68%" }]}
+                      />
+                      <Text style={{ color: "red" }}>
+                        <ErrorMessage name="subject" />
+                      </Text>
+                    </View>
+                    <TextInput
+                      onChangeText={setNewCategory}
+                      value={newCategory}
+                      style={[
+                        {
+                          width: "68%",
+                          borderWidth: 0.5,
+                          // width: "100%",
+                          marginHorizontal: 2,
+                          marginVertical: 6,
+                          paddingHorizontal: 2,
+                          fontSize: 16,
+                        },
+                      ]}
+                      placeholder="Add Category"
+                      //  //  validate={prop.validatefield}
+                    />
+                    <Button
+                      color="green"
+                      height={10}
+                      width={10}
+                      title="Add"
+                      onPress={() => {}}
+                    />
+                  </View>
 
                   <SelectList
                     data={questionTypes}
