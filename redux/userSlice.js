@@ -88,9 +88,8 @@ export const userSlice = createSlice({
     setDbUserDateJoined: (state, action) => {
       state.dbUserDateJoined = action.payload;
     },
-    setDbUserExempted: (state, action) => {
-      state.dbUserExempted = action.payload;
-    },
+    setDbUserExempted: (state, action) => { state.dbUserExempted = action.payload; }
+,
     setOpenGroupList: (state, action) => {
       state.openGroupList = action.payload;
     },
