@@ -1,18 +1,12 @@
-import {
-  createSlice,
-  configureStore,
-  createAsyncThunk,
-  createAction,
-} from "@reduxjs/toolkit";
-
+// redux/userSlice.js
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import firestore from "@react-native-firebase/firestore";
-import { Alert } from "react-native";
 
 const initialState = {
   userId: null,
   userEmail: null,
   DbUser: null,
-  loading: true,
+  loading: false,
   errorMessage: null,
   paymentStatus: false,
   currentGroupName: null,
@@ -29,40 +23,29 @@ const initialState = {
   showAdvert: false,
 };
 
-const fetchUser = createAsyncThunk("DbUser/fetchUser", async (userId) => {
-  try {
-    const userDoc = await firestore().collection("users").doc(userId).get();
-    // .onSnapshot((snapshot) => {
-    //   return snapshot?.data();
-    // });
-    const user = userDoc.data();
-    let paid = false;
+export const fetchUser = createAsyncThunk(
+  "DbUser/fetchUser",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const userDoc = await firestore().collection("users").doc(userId).get();
+      const user = userDoc.data();
+      if (!user) return rejectWithValue("User not found");
 
-    let data1 =
-      user && Array.isArray(user.payments) && user.payments.length > 0
-        ? user?.payments[user?.payments?.length - 1]?.nextDueDate > Date.now()
-        : false;
+      const hasPaid =
+        (Array.isArray(user.payments) &&
+          user.payments.length > 0 &&
+          user.payments.at(-1).nextDueDate > Date.now()) ||
+        user?.exempted ||
+        (user.dateJoined && Date.now() - user.dateJoined < 7 * 86400000);
 
-    let data2 = user?.exempted ?? false;
-    let data3 =
-      user !== undefined && user?.dateJoined !== undefined
-        ? Date.now() - user?.dateJoined ?? Date.now() < 7 * 86400000
-        : false;
-
-    paid = data2 || data1 || data3 ? true : false;
-
-    let data = JSON.stringify({ user, paid });
-
-    return data;
-  } catch (error) {
-    // Alert.alert("Error fetching user:", error);
-    throw error?.message;
+      return { user, paid: !!hasPaid };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-});
+);
 
-//export const triggerUserFetch = createAction("DbUser/triggerUserFetch");
-
-const userSlice = createSlice({
+export const userSlice = createSlice({
   name: "DbUser",
   initialState,
   reducers: {
@@ -78,7 +61,7 @@ const userSlice = createSlice({
     setEmailVerified: (state, action) => {
       state.emailVerified = action.payload;
     },
-    setRunAppUseEffect: (state, action) => {
+    setRunAppUseEffect: (state) => {
       state.runAppUseEffect = !state.runAppUseEffect;
     },
     setDbUser: (state, action) => {
@@ -106,7 +89,7 @@ const userSlice = createSlice({
       state.dbUserDateJoined = action.payload;
     },
     setDbUserExempted: (state, action) => {
-      state.setDbUserExempted = action.payload;
+      state.dbUserExempted = action.payload;
     },
     setOpenGroupList: (state, action) => {
       state.openGroupList = action.payload;
@@ -118,28 +101,21 @@ const userSlice = createSlice({
       state.showAdvert = action.payload;
     },
   },
-  // extraReducers: (builder) => {
-  //   builder
-  //     .addCase(fetchUser.pending, (state, action) => {
-  //       state.loading = true;
-  //     })
-  //     .addCase(fetchUser.fulfilled, (state, action) => {
-  //       {
-  //         state.paymentStatus = JSON.parse(action.payload).paid || false;
-  //         state.DbUser = JSON.parse(action.payload).user;
-  //         state.loading = false;
-  //       }
-  //     })
-  //     .addCase(fetchUser.rejected, (state, action) => {
-  //       state.errorMessage = action.payload.error.message;
-  //       state.loading = false;
-  //     });
-  // },
-});
-
-export const store = configureStore({
-  reducer: {
-    user: userSlice.reducer,
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUser.pending, (state) => {
+        state.loading = true;
+        state.errorMessage = null;
+      })
+      .addCase(fetchUser.fulfilled, (state, action) => {
+        state.paymentStatus = action.payload.paid;
+        state.DbUser = action.payload.user;
+        state.loading = false;
+      })
+      .addCase(fetchUser.rejected, (state, action) => {
+        state.errorMessage = action.payload;
+        state.loading = false;
+      });
   },
 });
 
@@ -162,5 +138,5 @@ export const {
   setQuestionCategory,
   setShowAdvert,
 } = userSlice.actions;
-//export { fetchUser };
-export default store;
+
+export default userSlice.reducer;
